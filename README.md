@@ -1,4 +1,4 @@
-# penguins <img src="https://raw.githubusercontent.com/CBurruss/penguins/refs/heads/main/hex/penguins-hex.png" align="right" width="115" alt="Hexagonal logo for the penguins package" /> 
+# penguins <img src="https://raw.githubusercontent.com/CBurruss/penguins/refs/heads/main/hex/penguins-hex.png" align="right" width="120" alt="Hexagonal logo for the penguins package" /> 
 
 a port of the dplyr-based siuba package for polars
 
