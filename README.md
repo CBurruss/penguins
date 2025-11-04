@@ -1,4 +1,7 @@
 # penguins
+
+<img src="./hex/penguins-hex.png" align="right" alt="penguin-hex" width="180" />
+
 a port of the dplyr-based siuba package for polars
 
 ## About penguins
