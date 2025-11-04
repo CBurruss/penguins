@@ -16,18 +16,18 @@ pip install git+https://github.com/CBurruss/penguins.git
 
 ## What's Inside
 
-If we look at the penguins package, we can group its utilities into three main categories — core functionality, acutis methods, and verb functions. 
+If we look at the penguins package, we can group its utilities into four main categories — 1) core functionality, 2) acutis methods, 3) verb functions, and 4) helper functions. 
 
-### Core functionality
+### 1. Core functionality
 
-At its core, penguins provides a dplyr-flavored  interface for polars through two main features:
+At its core, penguins provides a dplyr-flavored interface for polars through two main features:
 
  - The pipe operator `>>` — enables function function chaining akin to R's `|>` pipe
  - The symbolic placeholder `_` — acts as a helper by standing in for two main use cases:
       1. DataFrame references in method calls — e.g. `df >> _.head(5)`
       2. Column references in verb expressions — e.g. `df >> select(_.col)`
 
-### Acutis methods
+### 2. Acutis methods
 
 Unlike its more principled pandas counterpart (siuba), penguins takes the [careless] liberty of extending polars objects with both implicit and explicit methods! Each of these were ported from my [acutis](https://github.com/CBurruss/acutis) R package and provide handy functionality for typical data processsing and handling. 
 
@@ -41,9 +41,9 @@ Unlike its more principled pandas counterpart (siuba), penguins takes the [carel
  - `not_in()` — perform the inverse of the `is_in()` method
  - `not_like()` — perform the inverse of the `str.contains()` method
 
-### Verb functions
+### 3. Verb functions
 
-As hinted at above, penguins gains most of its utility from its dplyr-styled functions. While they'll be covered in the [Examples](#examples) section, here are the functions that have currently been ported over:
+As hinted at above, penguins gains most of its utility from its dplyr-styled functions. While they'll be covered in the [Examples](#examples) section, here are the verb functions that have currently been ported over:
 1. `select()` — select specific columns from the DataFrame
 2. `filter()` — filter rows based on boolean conditions
 3. `mutate()` — create new columns or modify existing ones
@@ -57,6 +57,14 @@ As hinted at above, penguins gains most of its utility from its dplyr-styled fun
 11. `relocate()` — reorder columns in a DataFrame
 12. `rename()` — rename columns
 13. `round()` — round numeric columns to specified decimal places
+
+### 4. Helper functions
+
+As of release `v.0.2.0`, included are various helper functions to assist in column selection within `select()` and `mutate()`:
+1. `across()` — allows the application of a function across columns
+2. `where()` — for subsetting columns based on one or more conditions
+     - Supports `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean` and `is_temporal` as boolean checks for column data types
+     - As well as pattern matching on column names with `starts_with()`, `ends_with()` and `contains()` 
 
 ## Examples
 
@@ -101,15 +109,16 @@ df.head(5).affiche()
 ```
 
 ```
-╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦══════╗
-║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year ║
-╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬══════╣
-║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007 ║
-║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007 ║
-║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007 ║
-║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007 ║
-║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007 ║
-╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩══════╝
+╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str     ║ str       ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007  ║
+║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007  ║
+║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007  ║
+║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007  ║
+║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007  ║
+╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
 ```
 </details> 
 
@@ -123,13 +132,14 @@ df["island"].count_table().affiche()
 ```
 
 ```
-╔═══════════╦═══════╦═════════╗
-║ island    ║ count ║ percent ║
-╠═══════════╬═══════╬═════════╣
-║ Biscoe    ║ 168   ║ 49%     ║
-║ Dream     ║ 124   ║ 36%     ║
-║ Torgersen ║ 52    ║ 15%     ║
-╚═══════════╩═══════╩═════════╝
+╔═══════════╦════════╦═════════╗
+║ island    ║ count  ║ percent ║
+║ str       ║ uint32 ║ str     ║
+╠═══════════╬════════╬═════════╣
+║ Biscoe    ║ 168    ║ 49%     ║
+║ Dream     ║ 124    ║ 36%     ║
+║ Torgersen ║ 52     ║ 15%     ║
+╚═══════════╩════════╩═════════╝
 ```
 </details> 
 
@@ -138,33 +148,37 @@ df["island"].count_table().affiche()
 <details>
 <summary>View examples</summary>
 
+By default, this palmers dataset has "NA" string values:
+
 ```python
-print("Without pasteurize():")
 df["sex"].count_table().affiche()
 
-print("With pasteurize():")
-df.pasteurize()["sex"].count_table().affiche()
+```
+```
+╔════════╦════════╦═════════╗
+║ sex    ║ count  ║ percent ║
+║ str    ║ uint32 ║ str     ║
+╠════════╬════════╬═════════╣
+║ male   ║ 168    ║ 49%     ║
+║ female ║ 165    ║ 48%     ║
+║ NA     ║ 11     ║ 3%      ║
+╚════════╩════════╩═════════╝
 ```
 
+However, applying `pasteurize()` automatically converts them to true missing `null` values:
+
+```python
+df.pasteurize()["sex"].count_table().affiche()
 ```
-Without pasteurize():
-╔════════╦═══════╦═════════╗
-║ sex    ║ count ║ percent ║
-╠════════╬═══════╬═════════╣
-║ male   ║ 168   ║ 49%     ║
-║ female ║ 165   ║ 48%     ║
-║ NA     ║ 11    ║ 3%      ║
-╚════════╩═══════╩═════════╝
-With pasteurize():
-╔════════╦═══════╦═════════╗
-║ sex    ║ count ║ percent ║
-╠════════╬═══════╬═════════╣
-║ Male   ║ 168   ║ 49%     ║
-║ Female ║ 165   ║ 48%     ║
-║ null   ║ 11    ║ 3%      ║
-╚════════╩═══════╩═════════╝
-# Note how the "NA" character string was converted to a true missing value
-# and now displays as `null`
+```
+╔════════╦════════╦═════════╗
+║ sex    ║ count  ║ percent ║
+║ str    ║ uint32 ║ str     ║
+╠════════╬════════╬═════════╣
+║ Male   ║ 168    ║ 49%     ║
+║ Female ║ 165    ║ 48%     ║
+║ null   ║ 11     ║ 3%      ║
+╚════════╩════════╩═════════╝
 ```
 
 </details> 
@@ -183,16 +197,17 @@ df >> filter(_.rowid.not_in(range(1, 339))) \
 ```
 
 ```
-╔═══════╦═══════════╦════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦══════╗
-║ rowid ║ species   ║ island ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year ║
-╠═══════╬═══════════╬════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬══════╣
-║ 339   ║ Chinstrap ║ Dream  ║ 45.7           ║ 17            ║ 195               ║ 3650        ║ female ║ 2009 ║
-║ 340   ║ Chinstrap ║ Dream  ║ 55.8           ║ 19.8          ║ 207               ║ 4000        ║ male   ║ 2009 ║
-║ 341   ║ Chinstrap ║ Dream  ║ 43.5           ║ 18.1          ║ 202               ║ 3400        ║ female ║ 2009 ║
-║ 342   ║ Chinstrap ║ Dream  ║ 49.6           ║ 18.2          ║ 193               ║ 3775        ║ male   ║ 2009 ║
-║ 343   ║ Chinstrap ║ Dream  ║ 50.8           ║ 19            ║ 210               ║ 4100        ║ male   ║ 2009 ║
-║ 344   ║ Chinstrap ║ Dream  ║ 50.2           ║ 18.7          ║ 198               ║ 3775        ║ female ║ 2009 ║
-╚═══════╩═══════════╩════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩══════╝
+╔═══════╦═══════════╦════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species   ║ island ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str       ║ str    ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═══════════╬════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 339   ║ Chinstrap ║ Dream  ║ 45.7           ║ 17            ║ 195               ║ 3650        ║ female ║ 2009  ║
+║ 340   ║ Chinstrap ║ Dream  ║ 55.8           ║ 19.8          ║ 207               ║ 4000        ║ male   ║ 2009  ║
+║ 341   ║ Chinstrap ║ Dream  ║ 43.5           ║ 18.1          ║ 202               ║ 3400        ║ female ║ 2009  ║
+║ 342   ║ Chinstrap ║ Dream  ║ 49.6           ║ 18.2          ║ 193               ║ 3775        ║ male   ║ 2009  ║
+║ 343   ║ Chinstrap ║ Dream  ║ 50.8           ║ 19            ║ 210               ║ 4100        ║ male   ║ 2009  ║
+║ 344   ║ Chinstrap ║ Dream  ║ 50.2           ║ 18.7          ║ 198               ║ 3775        ║ female ║ 2009  ║
+╚═══════╩═══════════╩════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
 ```
 
 </details> 
@@ -210,15 +225,16 @@ df >> filter(_.island.not_like("^B|D")) \
 ```
 
 ```
-╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦══════╗
-║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year ║
-╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬══════╣
-║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007 ║
-║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007 ║
-║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007 ║
-║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007 ║
-║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007 ║
-╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩══════╝
+╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str     ║ str       ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007  ║
+║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007  ║
+║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007  ║
+║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007  ║
+║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007  ║
+╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
 ```
 
 </details> 
@@ -238,15 +254,16 @@ df >> select(_.species, _.sex, _.year) \
     >> affiche()
 ```
 ```
-╔═════════╦════════╦══════╗
-║ species ║ sex    ║ year ║
-╠═════════╬════════╬══════╣
-║ Adelie  ║ male   ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-║ Adelie  ║ NA     ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-╚═════════╩════════╩══════╝
+╔═════════╦════════╦═══════╗
+║ species ║ sex    ║ year  ║
+║ str     ║ str    ║ int64 ║
+╠═════════╬════════╬═══════╣
+║ Adelie  ║ male   ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+║ Adelie  ║ NA     ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+╚═════════╩════════╩═══════╝
 ```
 
 We can also use the inverse operator `~` for de-selecting columns:
@@ -257,15 +274,16 @@ df >> select(~_.species, ~_.island, ~_.body_mass_g, ~_.sex) \
     >> affiche()
 ```
 ```
-╔═══════╦════════════════╦═══════════════╦═══════════════════╦══════╗
-║ rowid ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ year ║
-╠═══════╬════════════════╬═══════════════╬═══════════════════╬══════╣
-║ 1     ║ 39.1           ║ 18.7          ║ 181               ║ 2007 ║
-║ 2     ║ 39.5           ║ 17.4          ║ 186               ║ 2007 ║
-║ 3     ║ 40.3           ║ 18            ║ 195               ║ 2007 ║
-║ 4     ║ NA             ║ NA            ║ NA                ║ 2007 ║
-║ 5     ║ 36.7           ║ 19.3          ║ 193               ║ 2007 ║
-╚═══════╩════════════════╩═══════════════╩═══════════════════╩══════╝
+╔═══════╦════════════════╦═══════════════╦═══════════════════╦═══════╗
+║ rowid ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ year  ║
+║ int64 ║ str            ║ str           ║ str               ║ int64 ║
+╠═══════╬════════════════╬═══════════════╬═══════════════════╬═══════╣
+║ 1     ║ 39.1           ║ 18.7          ║ 181               ║ 2007  ║
+║ 2     ║ 39.5           ║ 17.4          ║ 186               ║ 2007  ║
+║ 3     ║ 40.3           ║ 18            ║ 195               ║ 2007  ║
+║ 4     ║ NA             ║ NA            ║ NA                ║ 2007  ║
+║ 5     ║ 36.7           ║ 19.3          ║ 193               ║ 2007  ║
+╚═══════╩════════════════╩═══════════════╩═══════════════════╩═══════╝
 ```
 
 As well as the column range operator `|` for specifying a range of columns
@@ -277,6 +295,7 @@ df >> select(_.bill_length_mm | _.body_mass_g) \
 ```
 ╔════════════════╦═══════════════╦═══════════════════╦═════════════╗
 ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║
+║ str            ║ str           ║ str               ║ str         ║
 ╠════════════════╬═══════════════╬═══════════════════╬═════════════╣
 ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║
 ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║
@@ -296,15 +315,16 @@ df >> select(*cols) \
     >> affiche()
 ```
 ```
-╔═════════╦════════╦══════╗
-║ species ║ sex    ║ year ║
-╠═════════╬════════╬══════╣
-║ Adelie  ║ male   ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-║ Adelie  ║ NA     ║ 2007 ║
-║ Adelie  ║ female ║ 2007 ║
-╚═════════╩════════╩══════╝
+╔═════════╦════════╦═══════╗
+║ species ║ sex    ║ year  ║
+║ str     ║ str    ║ int64 ║
+╠═════════╬════════╬═══════╣
+║ Adelie  ║ male   ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+║ Adelie  ║ NA     ║ 2007  ║
+║ Adelie  ║ female ║ 2007  ║
+╚═════════╩════════╩═══════╝
 ```
 
 Further, `select()` allows for various selector functions: `starts_with()`, `ends_with()` and `contains()` 
@@ -317,6 +337,7 @@ df >> select(ends_with("mm")) \
 ```
 ╔════════════════╦═══════════════╦═══════════════════╗
 ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║
+║ str            ║ str           ║ str               ║
 ╠════════════════╬═══════════════╬═══════════════════╣
 ║ 39.1           ║ 18.7          ║ 181               ║
 ║ 39.5           ║ 17.4          ║ 186               ║
@@ -335,15 +356,16 @@ df >> select(~(_.bill_length_mm | _.body_mass_g)) \
     >> affiche()
 ```
 ```
-╔═════════╦═══════════╦════════╦══════╗
-║ species ║ island    ║ sex    ║ year ║
-╠═════════╬═══════════╬════════╬══════╣
-║ Adelie  ║ Torgersen ║ male   ║ 2007 ║
-║ Adelie  ║ Torgersen ║ female ║ 2007 ║
-║ Adelie  ║ Torgersen ║ female ║ 2007 ║
-║ Adelie  ║ Torgersen ║ NA     ║ 2007 ║
-║ Adelie  ║ Torgersen ║ female ║ 2007 ║
-╚═════════╩═══════════╩════════╩══════╝
+╔═════════╦═══════════╦════════╦═══════╗
+║ species ║ island    ║ sex    ║ year  ║
+║ str     ║ str       ║ str    ║ int64 ║
+╠═════════╬═══════════╬════════╬═══════╣
+║ Adelie  ║ Torgersen ║ male   ║ 2007  ║
+║ Adelie  ║ Torgersen ║ female ║ 2007  ║
+║ Adelie  ║ Torgersen ║ female ║ 2007  ║
+║ Adelie  ║ Torgersen ║ NA     ║ 2007  ║
+║ Adelie  ║ Torgersen ║ female ║ 2007  ║
+╚═════════╩═══════════╩════════╩═══════╝
 ```
 
 </details> 
@@ -361,15 +383,16 @@ df >> filter(_.sex == "male", _.year == 2008) \
 ```
 
 ```
-╔═══════╦══════╦══════╗
-║ rowid ║ sex  ║ year ║
-╠═══════╬══════╬══════╣
-║ 52    ║ male ║ 2008 ║
-║ 54    ║ male ║ 2008 ║
-║ 56    ║ male ║ 2008 ║
-║ 58    ║ male ║ 2008 ║
-║ 60    ║ male ║ 2008 ║
-╚═══════╩══════╩══════╝
+╔═══════╦══════╦═══════╗
+║ rowid ║ sex  ║ year  ║
+║ int64 ║ str  ║ int64 ║
+╠═══════╬══════╬═══════╣
+║ 52    ║ male ║ 2008  ║
+║ 54    ║ male ║ 2008  ║
+║ 56    ║ male ║ 2008  ║
+║ 58    ║ male ║ 2008  ║
+║ 60    ║ male ║ 2008  ║
+╚═══════╩══════╩═══════╝
 ```
 
 </details> 
@@ -390,6 +413,7 @@ df >> mutate(is_male = _.sex == "male") \
 ```
 ╔═══════╦════════╦═════════╗
 ║ rowid ║ sex    ║ is_male ║
+║ int64 ║ str    ║ bool    ║
 ╠═══════╬════════╬═════════╣
 ║ 1     ║ male   ║ True    ║
 ║ 2     ║ female ║ False   ║
@@ -410,6 +434,7 @@ df >> mutate(genus = None, _after = "species") \
 ```
 ╔═══════╦═════════╦═══════╗
 ║ rowid ║ species ║ genus ║
+║ int64 ║ str     ║ null  ║
 ╠═══════╬═════════╬═══════╣
 ║ 1     ║ Adelie  ║ null  ║
 ║ 2     ║ Adelie  ║ null  ║
@@ -430,6 +455,7 @@ df >> mutate(across([_.species, _.island], lambda x: x.str.to_lowercase())) \
 ```
 ╔═════════╦═══════════╗
 ║ species ║ island    ║
+║ str     ║ str       ║
 ╠═════════╬═══════════╣
 ║ adelie  ║ torgersen ║
 ║ adelie  ║ torgersen ║
@@ -442,26 +468,25 @@ df >> mutate(across([_.species, _.island], lambda x: x.str.to_lowercase())) \
 We can even use the selector helpers — `starts_with()`, `ends_with()` and `contains()` — within our `where()` call:
 
 ```python
-# We'll use print() since it tells us our data types
 df >> mutate(across(ends_with("mm"), lambda x: x.cast(pl.Float64, strict = False))) \
     >> select(ends_with("mm")) \
-    >> print
+    >> head() \
+    >> affiche()
 ```
 ```
-┌────────────────┬───────────────┬───────────────────┐
-│ bill_length_mm ┆ bill_depth_mm ┆ flipper_length_mm │
-│ ---            ┆ ---           ┆ ---               │
-│ f64            ┆ f64           ┆ f64               │
-╞════════════════╪═══════════════╪═══════════════════╡
-│ 39.1           ┆ 18.7          ┆ 181.0             │
-│ 39.5           ┆ 17.4          ┆ 186.0             │
-│ 40.3           ┆ 18.0          ┆ 195.0             │
-│ null           ┆ null          ┆ null              │
-│ 36.7           ┆ 19.3          ┆ 193.0             │
-└────────────────┴───────────────┴───────────────────┘
+╔════════════════╦═══════════════╦═══════════════════╗
+║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║
+║ float64        ║ float64       ║ float64           ║
+╠════════════════╬═══════════════╬═══════════════════╣
+║ 39.1           ║ 18.7          ║ 181.0             ║
+║ 39.5           ║ 17.4          ║ 186.0             ║
+║ 40.3           ║ 18.0          ║ 195.0             ║
+║ null           ║ null          ║ null              ║
+║ 36.7           ║ 19.3          ║ 193.0             ║
+╚════════════════╩═══════════════╩═══════════════════╝
 ```
 
-We also have access to the following helper functions within `where()`: `is_numeric()`, `is_integer()`, `is_float()`, `is_string()`, `is_boolean()` and `is_temporal()` 
+We also have access to the following helper functions within `where()`: `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean` and `is_temporal` 
 
 ```python
 # Covert strings to uppercase
@@ -473,15 +498,16 @@ df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase())) \
     >> affiche()
 ```
 ```
-╔═══════════╦═══════════╦════════╗
-║ species   ║ island    ║ sex    ║
-╠═══════════╬═══════════╬════════╣
-║ ADELIE    ║ DREAM     ║ NA     ║
-║ CHINSTRAP ║ DREAM     ║ MALE   ║
-║ ADELIE    ║ BISCOE    ║ FEMALE ║
-║ ADELIE    ║ TORGERSEN ║ NA     ║
-║ ADELIE    ║ TORGERSEN ║ MALE   ║
-╚═══════════╩═══════════╩════════╝
+╔═════════╦════════╦════════╗
+║ species ║ island ║ sex    ║
+║ str     ║ str    ║ str    ║
+╠═════════╬════════╬════════╣
+║ GENTOO  ║ BISCOE ║ NA     ║
+║ GENTOO  ║ BISCOE ║ FEMALE ║
+║ ADELIE  ║ BISCOE ║ FEMALE ║
+║ ADELIE  ║ DREAM  ║ NA     ║
+║ ADELIE  ║ BISCOE ║ MALE   ║
+╚═════════╩════════╩════════╝
 ```
 
 </details> 
@@ -498,13 +524,14 @@ df >> group_by(_.species) \
 ```
 
 ```
-╔═══════════╦═══════╗
-║ species   ║ count ║
-╠═══════════╬═══════╣
-║ Adelie    ║ 152   ║
-║ Chinstrap ║ 68    ║
-║ Gentoo    ║ 124   ║
-╚═══════════╩═══════╝
+╔═══════════╦════════╗
+║ species   ║ count  ║
+║ str       ║ uint32 ║
+╠═══════════╬════════╣
+║ Chinstrap ║ 68     ║
+║ Gentoo    ║ 124    ║
+║ Adelie    ║ 152    ║
+╚═══════════╩════════╝
 ```
 
 </details> 
@@ -515,21 +542,24 @@ df >> group_by(_.species) \
 <details>
 <summary>View examples</summary>
 
+The default is 5 rows but can be specified:
+
 ```python
-# Where the default is 5 rows but can be specified
-df >> head() >> affiche()
+df >> head() \
+    >> affiche()
 ```
 
 ```
-╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦══════╗
-║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year ║
-╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬══════╣
-║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007 ║
-║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007 ║
-║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007 ║
-║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007 ║
-║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007 ║
-╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩══════╝
+╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str     ║ str       ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 1     ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ male   ║ 2007  ║
+║ 2     ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ female ║ 2007  ║
+║ 3     ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ female ║ 2007  ║
+║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA     ║ 2007  ║
+║ 5     ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ female ║ 2007  ║
+╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
 ```
 
 </details> 
@@ -539,18 +569,22 @@ df >> head() >> affiche()
 <details>
 <summary>View examples</summary>
 
+Similar to `head()`, default of 5 with an optional argument:
+
 ```python
 # Tail also has a default of 5, but we'll provide 2 here
-df >> tail(2) >> affiche()
+df >> tail(2) \
+    >> affiche()
 ```
 
 ```
-╔═══════╦═══════════╦════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦══════╗
-║ rowid ║ species   ║ island ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year ║
-╠═══════╬═══════════╬════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬══════╣
-║ 343   ║ Chinstrap ║ Dream  ║ 50.8           ║ 19            ║ 210               ║ 4100        ║ male   ║ 2009 ║
-║ 344   ║ Chinstrap ║ Dream  ║ 50.2           ║ 18.7          ║ 198               ║ 3775        ║ female ║ 2009 ║
-╚═══════╩═══════════╩════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩══════╝
+╔═══════╦═══════════╦════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species   ║ island ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str       ║ str    ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═══════════╬════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 343   ║ Chinstrap ║ Dream  ║ 50.8           ║ 19            ║ 210               ║ 4100        ║ male   ║ 2009  ║
+║ 344   ║ Chinstrap ║ Dream  ║ 50.2           ║ 18.7          ║ 198               ║ 3775        ║ female ║ 2009  ║
+╚═══════╩═══════════╩════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
 ```
 
 </details> 
@@ -570,6 +604,7 @@ df >> slice(-5) \
 ```
 ╔═══════╦════════╗
 ║ rowid ║ island ║
+║ int64 ║ str    ║
 ╠═══════╬════════╣
 ║ 340   ║ Dream  ║
 ║ 341   ║ Dream  ║
@@ -589,12 +624,13 @@ df >> slice(9, 5) \
 ```
 ╔═══════╦═══════════╗
 ║ rowid ║ island    ║
+║ int64 ║ str       ║
 ╠═══════╬═══════════╣
+║ 10    ║ Torgersen ║
 ║ 11    ║ Torgersen ║
 ║ 12    ║ Torgersen ║
 ║ 13    ║ Torgersen ║
 ║ 14    ║ Torgersen ║
-║ 15    ║ Torgersen ║
 ╚═══════╩═══════════╝
 ```
 
@@ -605,8 +641,10 @@ df >> slice(9, 5) \
 <details>
 <summary>View examples</summary>
 
+
+The default behavior of `distinct()` is application to all columns, but can be specified: 
+
 ```python
-# Default behavior is to pull distinct() on all columns 
 df >> select(_.island, _.species) \
     >> distinct() \
     >> affiche()
@@ -615,12 +653,13 @@ df >> select(_.island, _.species) \
 ```
 ╔═══════════╦═══════════╗
 ║ island    ║ species   ║
+║ str       ║ str       ║
 ╠═══════════╬═══════════╣
-║ Dream     ║ Adelie    ║
-║ Biscoe    ║ Gentoo    ║
 ║ Biscoe    ║ Adelie    ║
-║ Dream     ║ Chinstrap ║
 ║ Torgersen ║ Adelie    ║
+║ Biscoe    ║ Gentoo    ║
+║ Dream     ║ Adelie    ║
+║ Dream     ║ Chinstrap ║
 ╚═══════════╩═══════════╝
 ```
 
@@ -631,8 +670,9 @@ df >> select(_.island, _.species) \
 <details>
 <summary>View examples</summary>
 
+By default, `arrange()` sorts ascending:
+
 ```python
-# By default, arrange() sorts ascending
 df >> arrange(_.body_mass_g) \
     >> select(_.rowid, _.species, _.body_mass_g) \
     >> head() \
@@ -641,6 +681,7 @@ df >> arrange(_.body_mass_g) \
 ```
 ╔═══════╦═══════════╦═════════════╗
 ║ rowid ║ species   ║ body_mass_g ║
+║ int64 ║ str       ║ str         ║
 ╠═══════╬═══════════╬═════════════╣
 ║ 315   ║ Chinstrap ║ 2700        ║
 ║ 59    ║ Adelie    ║ 2850        ║
@@ -650,8 +691,9 @@ df >> arrange(_.body_mass_g) \
 ╚═══════╩═══════════╩═════════════╝
 ```
 
+But we can use the `-` operator to sort descending:
+
 ```python
-# But we can use the - to sort descending
 df >> filter(_.body_mass_g != "NA") \
     >> arrange(-_.body_mass_g) \
     >> select(_.rowid, _.species, _.body_mass_g) \
@@ -661,6 +703,7 @@ df >> filter(_.body_mass_g != "NA") \
 ```
 ╔═══════╦═════════╦═════════════╗
 ║ rowid ║ species ║ body_mass_g ║
+║ int64 ║ str     ║ str         ║
 ╠═══════╬═════════╬═════════════╣
 ║ 170   ║ Gentoo  ║ 6300        ║
 ║ 186   ║ Gentoo  ║ 6050        ║
@@ -677,23 +720,25 @@ df >> filter(_.body_mass_g != "NA") \
 <details>
 <summary>View examples</summary>
 
+Like `mutate()`, we have optional `after` and `before` arguments:
+
 ```python
-# Like mutate(), we have optional `after` and `before` arguments
 df >> relocate(_.sex, after = _.rowid) \
     >> head() \
     >> affiche()
 ```
 
 ```
-╔═══════╦════════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦══════╗
-║ rowid ║ sex    ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ year ║
-╠═══════╬════════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬══════╣
-║ 1     ║ male   ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ 2007 ║
-║ 2     ║ female ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ 2007 ║
-║ 3     ║ female ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ 2007 ║
-║ 4     ║ NA     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ 2007 ║
-║ 5     ║ female ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ 2007 ║
-╚═══════╩════════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩══════╝
+╔═══════╦════════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦═══════╗
+║ rowid ║ sex    ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ year  ║
+║ int64 ║ str    ║ str     ║ str       ║ str            ║ str           ║ str               ║ str         ║ int64 ║
+╠═══════╬════════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬═══════╣
+║ 1     ║ male   ║ Adelie  ║ Torgersen ║ 39.1           ║ 18.7          ║ 181               ║ 3750        ║ 2007  ║
+║ 2     ║ female ║ Adelie  ║ Torgersen ║ 39.5           ║ 17.4          ║ 186               ║ 3800        ║ 2007  ║
+║ 3     ║ female ║ Adelie  ║ Torgersen ║ 40.3           ║ 18            ║ 195               ║ 3250        ║ 2007  ║
+║ 4     ║ NA     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ 2007  ║
+║ 5     ║ female ║ Adelie  ║ Torgersen ║ 36.7           ║ 19.3          ║ 193               ║ 3450        ║ 2007  ║
+╚═══════╩════════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩═══════╝
 ```
 
 </details> 
@@ -703,8 +748,10 @@ df >> relocate(_.sex, after = _.rowid) \
 <details>
 <summary>View examples</summary>
 
+Like siuba, `rename()` expects `new_name = _.old_name`
+
+
 ```python
-# Where rename() expects `new_name = _.old_name`
 df >> rename(row_id = _.rowid, 
              gender = _.sex) \
     >> select(_.row_id, _.gender) \
@@ -715,6 +762,7 @@ df >> rename(row_id = _.rowid,
 ```
 ╔════════╦════════╗
 ║ row_id ║ gender ║
+║ int64  ║ str    ║
 ╠════════╬════════╣
 ║ 1      ║ male   ║
 ║ 2      ║ female ║
@@ -731,59 +779,62 @@ df >> rename(row_id = _.rowid,
 <details>
 <summary>View examples</summary>
 
-By default, round() will round all numeric columns to two decimals:
+By default, `round()` will round all numeric columns to two decimals:
 
 ```python
-df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
-              bill_depth_mm = _.bill_depth_mm.cast(pl.Float64, strict = False),
-              flipper_length_mm = _.flipper_length_mm.cast(pl.Float64, strict = False)) \
+int_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
+
+df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
     >> _.describe() \
-    >> select(_.statistic, _.bill_length_mm, _.bill_depth_mm, _.flipper_length_mm) \
+    >> select(_.statistic, *int_cols) \
     >> round() \
     >> affiche()
 ```
 ```
-╔════════════╦════════════════╦═══════════════╦═══════════════════╗
-║ statistic  ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║
-╠════════════╬════════════════╬═══════════════╬═══════════════════╣
-║ count      ║ 342.0          ║ 342.0         ║ 342.0             ║
-║ null_count ║ 2.0            ║ 2.0           ║ 2.0               ║
-║ mean       ║ 43.92          ║ 17.15         ║ 200.92            ║
-║ std        ║ 5.46           ║ 1.97          ║ 14.06             ║
-║ min        ║ 32.1           ║ 13.1          ║ 172.0             ║
-║ 25%        ║ 39.2           ║ 15.6          ║ 190.0             ║
-║ 50%        ║ 44.5           ║ 17.3          ║ 197.0             ║
-║ 75%        ║ 48.5           ║ 18.7          ║ 213.0             ║
-║ max        ║ 59.6           ║ 21.5          ║ 231.0             ║
-╚════════════╩════════════════╩═══════════════╩═══════════════════╝
+╔════════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╗
+║ statistic  ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║
+║ str        ║ float64        ║ float64       ║ float64           ║ float64     ║
+╠════════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╣
+║ count      ║ 342.0          ║ 342.0         ║ 342.0             ║ 342.0       ║
+║ null_count ║ 2.0            ║ 2.0           ║ 2.0               ║ 2.0         ║
+║ mean       ║ 43.92          ║ 17.15         ║ 200.92            ║ 4201.75     ║
+║ std        ║ 5.46           ║ 1.97          ║ 14.06             ║ 801.95      ║
+║ min        ║ 32.1           ║ 13.1          ║ 172.0             ║ 2700.0      ║
+║ 25%        ║ 39.2           ║ 15.6          ║ 190.0             ║ 3550.0      ║
+║ 50%        ║ 44.5           ║ 17.3          ║ 197.0             ║ 4050.0      ║
+║ 75%        ║ 48.5           ║ 18.7          ║ 213.0             ║ 4750.0      ║
+║ max        ║ 59.6           ║ 21.5          ║ 231.0             ║ 6300.0      ║
+╚════════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╝
 ```
 
 But we can also specify columns, and to how many decimals:
 
 ```python
-df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
-              bill_depth_mm = _.bill_depth_mm.cast(pl.Float64, strict = False),
-              flipper_length_mm = _.flipper_length_mm.cast(pl.Float64, strict = False)) \
+int_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
+
+# Here, we use the unpacking operator * to unpack the list, filtered with a range
+df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
     >> _.describe() \
-    >> select(_.statistic, _.bill_length_mm, _.bill_depth_mm, _.flipper_length_mm) \
-    >> round(_.bill_length_mm, decimals = 5) \
-    >> round(_.bill_depth_mm, _.flipper_length_mm, decimals = 0) \
+    >> select(_.statistic, *int_cols) \
+    >> round(_.body_mass_g, decimals = 5) \
+    >> round(*int_cols[0:3], decimals = 0) \
     >> affiche()
 ```
 ```
-╔════════════╦════════════════╦═══════════════╦═══════════════════╗
-║ statistic  ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║
-╠════════════╬════════════════╬═══════════════╬═══════════════════╣
-║ count      ║ 342.0          ║ 342.0         ║ 342.0             ║
-║ null_count ║ 2.0            ║ 2.0           ║ 2.0               ║
-║ mean       ║ 43.92193       ║ 17.0          ║ 201.0             ║
-║ std        ║ 5.45958        ║ 2.0           ║ 14.0              ║
-║ min        ║ 32.1           ║ 13.0          ║ 172.0             ║
-║ 25%        ║ 39.2           ║ 16.0          ║ 190.0             ║
-║ 50%        ║ 44.5           ║ 17.0          ║ 197.0             ║
-║ 75%        ║ 48.5           ║ 19.0          ║ 213.0             ║
-║ max        ║ 59.6           ║ 22.0          ║ 231.0             ║
-╚════════════╩════════════════╩═══════════════╩═══════════════════╝
+╔════════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╗
+║ statistic  ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║
+║ str        ║ float64        ║ float64       ║ float64           ║ float64     ║
+╠════════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╣
+║ count      ║ 342.0          ║ 342.0         ║ 342.0             ║ 342.0       ║
+║ null_count ║ 2.0            ║ 2.0           ║ 2.0               ║ 2.0         ║
+║ mean       ║ 44.0           ║ 17.0          ║ 201.0             ║ 4201.75439  ║
+║ std        ║ 5.0            ║ 2.0           ║ 14.0              ║ 801.95454   ║
+║ min        ║ 32.0           ║ 13.0          ║ 172.0             ║ 2700.0      ║
+║ 25%        ║ 39.0           ║ 16.0          ║ 190.0             ║ 3550.0      ║
+║ 50%        ║ 44.0           ║ 17.0          ║ 197.0             ║ 4050.0      ║
+║ 75%        ║ 48.0           ║ 19.0          ║ 213.0             ║ 4750.0      ║
+║ max        ║ 60.0           ║ 22.0          ║ 231.0             ║ 6300.0      ║
+╚════════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╝
 ```
 
 </details> 
