@@ -13,7 +13,7 @@ setup(
     author="Connor Burruss",
     author_email="cburru2@gmail.com",
     description="A polars addon for dplyr-style methods and functions",
-    long_description=open('README.md').read(),
+    long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python :: 3.8",
