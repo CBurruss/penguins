@@ -560,9 +560,9 @@ df >> tail(2) >> affiche()
 <details>
 <summary>View examples</summary>
 
+With one argument, `slice()` accesses rows at that position — here, the last five rows (-5):
+
 ```python
-# With one argument, slice() accesses rows at that position
-# Here, the last five rows (-5)
 df >> slice(-5) \
     >> select(_.rowid, _.island) \
     >> affiche()
@@ -579,9 +579,9 @@ df >> slice(-5) \
 ╚═══════╩════════╝
 ```
 
+But with two arguments, it grabs the starting position (9), followed by the number of rows (5):
+
 ```python
-# But with two arguments, it grabs the starting position (100),
-# followed by the number of rows (5)
 df >> slice(9, 5) \
     >> select(_.rowid, _.island) \
     >> affiche()
@@ -731,8 +731,9 @@ df >> rename(row_id = _.rowid,
 <details>
 <summary>View examples</summary>
 
+By default, round() will round all numeric columns to two decimals:
+
 ```python
-# By default, round() will round all numeric columns to two decimals
 df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
               bill_depth_mm = _.bill_depth_mm.cast(pl.Float64, strict = False),
               flipper_length_mm = _.flipper_length_mm.cast(pl.Float64, strict = False)) \
@@ -741,7 +742,6 @@ df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
     >> round() \
     >> affiche()
 ```
-
 ```
 ╔════════════╦════════════════╦═══════════════╦═══════════════════╗
 ║ statistic  ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║
@@ -758,8 +758,9 @@ df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
 ╚════════════╩════════════════╩═══════════════╩═══════════════════╝
 ```
 
+But we can also specify columns, and to how many decimals:
+
 ```python
-# But we can also specify columns, and to what decimals
 df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False),
               bill_depth_mm = _.bill_depth_mm.cast(pl.Float64, strict = False),
               flipper_length_mm = _.flipper_length_mm.cast(pl.Float64, strict = False)) \

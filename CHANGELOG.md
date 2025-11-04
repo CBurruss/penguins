@@ -2,6 +2,11 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.2.1* — 2025-11-04
+
+### Improvements
+- `affiche()` now provides column data types
+
 ## *0.2.0* — 2025-11-03
 
 ### Features

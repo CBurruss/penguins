@@ -67,15 +67,29 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
 
     # Prepare display data
     col_names = df.columns
+    # Pull column types
+    col_types = [str(dtype) for dtype in df.dtypes]
+    
+    # Abbreviate common type names
+    type_abbrev = {
+        "string": "str",
+        "categorical": "cat",
+        "boolean": "bool",
+        "object": "obj",
+        "decimal": "dec"
+    }
+
+    col_types = [type_abbrev.get(dtype.lower(), dtype) for dtype in col_types]
     
     # Column widths
     col_widths = []
-    for col in col_names:
+    for i, col in enumerate(col_names):
         header_width = display_width(col)
+        type_width = display_width(col_types[i])
         # Get column values and apply color_na
         col_values = [color_na(val) for val in df[col].to_list()]
         data_widths = [display_width(val) for val in col_values]
-        col_widths.append(max([header_width] + data_widths))
+        col_widths.append(max([header_width, type_width] + data_widths))
 
     # Draw horizontal line
     def draw_hline(connector_left, connector_right, cross):
@@ -94,7 +108,7 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
     for i, name in enumerate(col_names):
         width = col_widths[i]
         pad_total = width - display_width(name)
-
+    
         if align == "left":
             pad_left = 0
         elif align == "center":
@@ -107,6 +121,26 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
         pad_right = pad_total - pad_left
         header_parts.append(f" {' ' * pad_left}{name}{' ' * pad_right} {border['v']}")
     header = "".join(header_parts)
+
+    # Type row
+    type_parts = [border["v"]]
+    for i, dtype in enumerate(col_types):
+        dtype_formatted = f"\033[3m{dtype.lower()}{reset}"
+        width = col_widths[i]
+        pad_total = width - display_width(dtype)
+
+        if align == "left":
+            pad_left = 0
+        elif align == "center":
+            pad_left = math.floor(pad_total / 2)
+        elif align == "right":
+            pad_left = pad_total
+        else:
+            pad_left = 0
+
+        pad_right = pad_total - pad_left
+        type_parts.append(f" {' ' * pad_left}{dtype_formatted}{' ' * pad_right} {border['v']}")
+    type_row = "".join(type_parts)
 
     # Data rows
     data_rows = []
@@ -133,6 +167,7 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
     # Print table
     print(top_line)
     print(header)
+    print(type_row)
     print(mid_line)
     print("\n".join(data_rows))
     print(bot_line)
@@ -195,15 +230,29 @@ def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
 
         # Prepare display data
         col_names = df.columns
+        # Pull column data types
+        col_types = [str(dtype) for dtype in df.dtypes]
+        
+        # Abbreviate common type names
+        type_abbrev = {
+            "string": "str",
+            "categorical": "cat",
+            "boolean": "bool",
+            "object": "obj",
+            "decimal": "dec"
+        }
+
+        col_types = [type_abbrev.get(dtype.lower(), dtype) for dtype in col_types]
     
         # Column widths
         col_widths = []
-        for col in col_names:
+        for i, col in enumerate(col_names):
             header_width = display_width(col)
+            type_width = display_width(col_types[i])
             # Get column values and apply color_na
             col_values = [color_na(val) for val in df[col].to_list()]
             data_widths = [display_width(val) for val in col_values]
-            col_widths.append(max([header_width] + data_widths))
+            col_widths.append(max([header_width, type_width] + data_widths))
 
         # Draw horizontal line
         def draw_hline(connector_left, connector_right, cross):
@@ -237,6 +286,26 @@ def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
         
         header = "".join(header_parts)
 
+        # Type row
+        type_parts = [border["v"]]
+        for i, dtype in enumerate(col_types):
+            dtype_formatted = f"\033[3m{dtype.lower()}{reset}"
+            width = col_widths[i]
+            pad_total = width - display_width(dtype)
+
+            if align == "left":
+                pad_left = 0
+            elif align == "center":
+                pad_left = math.floor(pad_total / 2)
+            elif align == "right":
+                pad_left = pad_total
+            else:
+                pad_left = 0
+
+            pad_right = pad_total - pad_left
+            type_parts.append(f" {' ' * pad_left}{dtype_formatted}{' ' * pad_right} {border['v']}")
+        type_row = "".join(type_parts)
+
         # Data rows
         data_rows = []
         for row_idx in range(len(df)):
@@ -263,6 +332,7 @@ def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
         # Print table
         print(top_line)
         print(header)
+        print(type_row)
         print(mid_line)
         print("\n".join(data_rows))
         print(bot_line)

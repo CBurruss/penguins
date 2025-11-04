@@ -33,7 +33,7 @@ from penguins.verbs.mutate import across, where, is_numeric, is_integer, is_floa
     is_string, is_boolean, is_temporal
 
 # set version
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # add to primary import 
 __all__ = ['_', 'Symbolic', 'select', 'mutate', 'filter', 'arrange', 'rename', 'group_by',
