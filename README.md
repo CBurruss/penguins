@@ -1,10 +1,10 @@
 # penguins
 
-<img src="./hex/penguins-hex.png" align="right" alt="penguin-hex" width="180" />
+<img src="https://raw.githubusercontent.com/CBurruss/penguins/refs/heads/main/hex/penguins-hex.png" style="width: 180px; float: right">
+
+<h2 style="margin-top: 60px;">About penguins</h2>
 
 a port of the dplyr-based siuba package for polars
-
-## About penguins
 
 I developed penguins because I love what [siuba](https://github.com/machow/siuba/blob/main/README.md) provides for pandas, and I wanted to bring the same versatility of R's tidyverse to [polars](https://github.com/pola-rs/polars). With that in mind, I wanted to create a package that would let me leverage the superior performance of polars (over pandas) with the versatility of [dplyr](https://github.com/tidyverse/dplyr). This is ultimately what makes siuba so powerful as an add-on for pandas, and why I think penguins is such a great addition to polars. 
 
