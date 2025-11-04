@@ -57,7 +57,7 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
     # Handle color for unique NA types
     def color_na(x):
         if x is None:
-            return f"{na_color}NA{reset}"
+            return f"{na_color}null{reset}"
         return str(x)
 
     # Width calculator (ignores ANSI codes)
@@ -185,7 +185,7 @@ def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
         # Handle color for unique NA types
         def color_na(x):
             if x is None:
-                return f"{na_color}NA{reset}"
+                return f"{na_color}null{reset}"
             return str(x)
 
         # Width calculator (ignores ANSI codes)

@@ -38,6 +38,7 @@ desktop.ini
 .coverage
 htmlcov/
 requirements-dev.txt
+update-guide.md
 
 # OS
 .DS_Store

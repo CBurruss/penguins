@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name="penguins",
-    version="0.1.0",
+    version="0.2.0",
     include_package_data=True,
     python_requires='>=3.8',
     packages=find_packages(),

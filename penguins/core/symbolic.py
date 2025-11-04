@@ -66,7 +66,25 @@ class SymbolicAttr:
         """Support >= comparisons"""
         return self._expr.__ge__(other)
     
-    # Patch in custom not_in() function
+    # Add invert method to select()
+    def __invert__(self):
+        """
+        Support deselection with ~ operator.
+    
+        Usage: df >> select(~_.column_name)
+        """
+        return DeSelect(self)
+    
+    # Add or method to select()
+    def __or__(self, other):
+        """
+        Support range selection with | operator.
+    
+        Usage: df >> select(_.col1 | _.col2)
+        """
+        return ColumnRange(self, other)
+    
+    # Patch in custom not_in() function 
     def not_in(self, values):
         """
         Check if values are NOT in the given list.
@@ -106,6 +124,30 @@ class Symbolic:
         Returns a SymbolicAttr that can be used as an expression or called as a method
         """
         return SymbolicAttr(name)
+    
+# Helper classes for column selection patterns
+class ColumnRange:
+    """
+    Represents a range of columns for selection.
+    
+    Created using the : operator between two SymbolicAttr objects.
+    """
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+    
+    def __invert__(self):
+        """Support ~ operator for deselection."""
+        return DeSelect(self)
+
+class DeSelect:
+    """
+    Represents columns to exclude from selection.
+    
+    Created using the ~ operator before a SymbolicAttr or helper function.
+    """
+    def __init__(self, col):
+        self.col = col
     
 # Create the global _ object for column references
 _ = Symbolic()

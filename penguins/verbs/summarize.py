@@ -1,4 +1,5 @@
 from penguins.core.symbolic import SymbolicAttr
+import polars as pl
 
 # Define the summarize() verb
 def summarize(**kwargs):

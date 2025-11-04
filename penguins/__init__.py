@@ -27,8 +27,17 @@ from penguins.verbs.distinct import distinct
 from penguins.verbs.slice import slice
 from penguins.verbs.relocate import relocate 
 
-__version__ = "0.1.0"
+# helper imports
+from penguins.verbs.select import starts_with, ends_with, contains
+from penguins.verbs.mutate import across, where, is_numeric, is_integer, is_float, \
+    is_string, is_boolean, is_temporal
 
+# set version
+__version__ = "0.2.0"
+
+# add to primary import 
 __all__ = ['_', 'Symbolic', 'select', 'mutate', 'filter', 'arrange', 'rename', 'group_by',
            'summarize', 'round', 'head', 'tail', 'distinct', 'slice', 'relocate', 
-           'affiche', 'pasteurize', 'count_table']
+           'affiche', 'pasteurize', 'count_table', 'starts_with', 'ends_with', 'contains', 
+           'across', 'where', 'is_numeric', 'is_integer', 'is_float', 'is_string', 
+           'is_boolean', 'is_temporal']
