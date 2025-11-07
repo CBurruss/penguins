@@ -233,7 +233,7 @@ df.pasteurize()["sex"].count_table().affiche()
 ```python
 # We'll preview the filter() function here,
 # which will be covered in the Functions examples
-# And use affiche() as function instead of a method
+# And use affiche() as a function instead of a method
 df >> filter(_.rowid.not_in(range(1, 339))) \
     >> affiche()
 ```
