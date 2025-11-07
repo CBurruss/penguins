@@ -55,10 +55,10 @@ As hinted at above, penguins gains most of its utility from its dplyr-styled fun
     - How: "inner", "left", "right", "outer", "cross", "semi", "anti"
 8. `pivot_wider()` — pivot a dataframe from long to wide format
 9. `pivot_longer()` — pivot a dataframe from wide to long format
-10. `unite()` 
-11. `separate()`
-12. `bind_cols()` 
-13. `bind_rows()` 
+10. `unite()` — combine multiple columns into one column
+11. `separate()` — split a column into multiple columns
+12. `bind_cols()` — bind the columns of two dataframes together
+13. `bind_rows()` — bind the rows of two dataframes together
 14. `head()` — return first n rows
 15. `tail()` — return last n rows
 16. `slice()` — select rows by position
