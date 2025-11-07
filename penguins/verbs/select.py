@@ -1,46 +1,14 @@
 from penguins.core.symbolic import SymbolicAttr, DeSelect, ColumnRange
-import polars as pl
+import polars as pl 
 
-# Helper classes for column selection
-class StartsWithSelector:
-    """Selects columns starting with a prefix."""
-    def __init__(self, prefix):
-        self.prefix = prefix
-    
-    def __invert__(self):
-        """Support ~ operator for deselection."""
-        return DeSelect(self)
-
-class EndsWithSelector:
-    """Selects columns ending with a suffix."""
-    def __init__(self, suffix):
-        self.suffix = suffix
-    
-    def __invert__(self):
-        """Support ~ operator for deselection."""
-        return DeSelect(self)
-
-class ContainsSelector:
-    """Selects columns containing a substring."""
-    def __init__(self, substring):
-        self.substring = substring
-    
-    def __invert__(self):
-        """Support ~ operator for deselection."""
-        return DeSelect(self)
-
-# Helper functions for column selection
-def starts_with(prefix):
-    """Select columns that start with the given prefix."""
-    return StartsWithSelector(prefix)
-
-def ends_with(suffix):
-    """Select columns that end with the given suffix."""
-    return EndsWithSelector(suffix)
-
-def contains(substring):
-    """Select columns that contain the given substring."""
-    return ContainsSelector(substring)
+from penguins.utils.helpers import (
+    StartsWithSelector, 
+    EndsWithSelector, 
+    ContainsSelector,
+    starts_with,
+    ends_with,
+    contains
+)
 
 # Define function for handling conflicts
 def _resolve_column_spec(spec, all_columns, df=None):

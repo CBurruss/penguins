@@ -10,7 +10,7 @@ I developed penguins because I love what [siuba](https://github.com/machow/siuba
 
 You can install the dev version of penguins with:
 
-```python
+```bash
 pip install git+https://github.com/CBurruss/penguins.git
 ```
 
@@ -35,6 +35,7 @@ Unlike its more principled pandas counterpart (siuba), penguins takes the [carel
  - `affiche()` — display a Polars DataFrame with aethetic table borders and styling (from the French *affiche* to display something)
      - As a bonus, this is also provided as a function! 
  - `count_table()` — create a frequency table with counts and percentages
+ - `count_null()` — create a summary table counting `null` values for each column in a DataFrame
  - `pasteurize()` — clean a DataFrame by removing empty rows, duplicates, and standardizing column names
 
 **Implicilty patched in:**  
@@ -49,22 +50,35 @@ As hinted at above, penguins gains most of its utility from its dplyr-styled fun
 3. `mutate()` — create new columns or modify existing ones
 4. `group_by()` —  group DataFrame by one or more columns
 5. `summarize()` — aggregate data, typically after `group_by()`
-6. `head()` — return first n rows
-7. `tail()` — return last n rows
-8. `slice()` — select rows by position
-9. `distinct()` — keep only unique rows based on specified columns
-10. `arrange()` — sort rows by column expressions
-11. `relocate()` — reorder columns in a DataFrame
-12. `rename()` — rename columns
-13. `round()` — round numeric columns to specified decimal places
+6. `pull()` — extract a single column as a series or scalar value
+7. `join()` — join two dataframes on a matching column
+    - How: "inner", "left", "right", "outer", "cross", "semi", "anti"
+8. `pivot_wider()` — pivot a dataframe from long to wide format
+9. `pivot_longer()` — pivot a dataframe from wide to long format
+10. `unite()` 
+11. `separate()`
+12. `bind_cols()` 
+13. `bind_rows()` 
+14. `head()` — return first n rows
+15. `tail()` — return last n rows
+16. `slice()` — select rows by position
+17. `sample()` — return a sample of rows from a dataframe
+18. `distinct()` — keep only unique rows based on specified columns
+19. `arrange()` — sort rows by column expressions
+20. `relocate()` — reorder columns in a DataFrame
+21. `rename()` — rename columns
+22. `round()` — round numeric columns to specified decimal places
+23. `drop_null()` — remove rows with `null` values
 
 ### 4. Helper functions
 
-As of release `v.0.2.0`, included are various helper functions to assist in column selection within `select()` and `mutate()`:
+Included are various helper functions to assist in column selection within `select()` and `mutate()`:
 1. `across()` — allows the application of a function across columns
+     - Supports pattern matching on column names with `starts_with()`, `ends_with()` and `contains()` 
 2. `where()` — for subsetting columns based on one or more conditions
-     - Supports `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean` and `is_temporal` as boolean checks for column data types
-     - As well as pattern matching on column names with `starts_with()`, `ends_with()` and `contains()` 
+     - Supports `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean`, `is_temporal`, `is_null` and `is_cat` as boolean checks for column data types
+3. `if_else()` and `case_when()` are both available within `mutate()` statements for conditional row assignment
+4. `row_contains()` — returns rows where any column contain given value[s] 
 
 ## Examples
 
@@ -143,7 +157,35 @@ df["island"].count_table().affiche()
 ```
 </details> 
 
-#### 3. `pasteurize()`
+#### 2. `count_null()`
+
+<details>
+<summary>View examples</summary>
+
+First, let's introduce some `null` values into our DataFrame, then we can call the `count_null()` method:
+
+```python
+df.with_columns(pl.all().replace("2007", None)).count_null().affiche()
+```
+```
+╔═══════════════════╦════════════╦══════════════╗
+║ col               ║ null_count ║ null_percent ║
+║ str               ║ uint32     ║ str          ║
+╠═══════════════════╬════════════╬══════════════╣
+║ year              ║ 110        ║ 32%          ║
+║ rowid             ║ 0          ║ 0%           ║
+║ species           ║ 0          ║ 0%           ║
+║ island            ║ 0          ║ 0%           ║
+║ bill_length_mm    ║ 0          ║ 0%           ║
+║ bill_depth_mm     ║ 0          ║ 0%           ║
+║ flipper_length_mm ║ 0          ║ 0%           ║
+║ body_mass_g       ║ 0          ║ 0%           ║
+║ sex               ║ 0          ║ 0%           ║
+╚═══════════════════╩════════════╩══════════════╝
+```
+</details> 
+
+#### 4. `pasteurize()`
 
 <details>
 <summary>View examples</summary>
@@ -183,7 +225,7 @@ df.pasteurize()["sex"].count_table().affiche()
 
 </details> 
 
-#### 4. `not_in()`
+#### 5. `not_in()`
 
 <details>
 <summary>View examples</summary>
@@ -212,7 +254,7 @@ df >> filter(_.rowid.not_in(range(1, 339))) \
 
 </details> 
 
-#### 5. `not_like()`
+#### 6. `not_like()`
 
 <details>
 <summary>View examples</summary>
@@ -375,13 +417,14 @@ df >> select(~(_.bill_length_mm | _.body_mass_g)) \
 <details>
 <summary>View examples</summary>
 
+Intuitively, `filter()` takes one or more arguments for finding rows that match certain conditions:
+
 ```python
 df >> filter(_.sex == "male", _.year == 2008) \
     >> select(_.rowid, _.sex, _.year) \
     >> head() \
     >> affiche()
 ```
-
 ```
 ╔═══════╦══════╦═══════╗
 ║ rowid ║ sex  ║ year  ║
@@ -393,6 +436,25 @@ df >> filter(_.sex == "male", _.year == 2008) \
 ║ 58    ║ male ║ 2008  ║
 ║ 60    ║ male ║ 2008  ║
 ╚═══════╩══════╩═══════╝
+```
+
+There's also a helper function `row_contains()` for filtering for any rows that match any given value[s]
+```python
+df >> filter(row_contains("NA", "None")) \
+    >> head() \
+    >> affiche()
+```
+```
+╔═══════╦═════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦═════╦═══════╗
+║ rowid ║ species ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex ║ year  ║
+║ int64 ║ str     ║ str       ║ str            ║ str           ║ str               ║ str         ║ str ║ int64 ║
+╠═══════╬═════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬═════╬═══════╣
+║ 4     ║ Adelie  ║ Torgersen ║ NA             ║ NA            ║ NA                ║ NA          ║ NA  ║ 2007  ║
+║ 9     ║ Adelie  ║ Torgersen ║ 34.1           ║ 18.1          ║ 193               ║ 3475        ║ NA  ║ 2007  ║
+║ 10    ║ Adelie  ║ Torgersen ║ 42             ║ 20.2          ║ 190               ║ 4250        ║ NA  ║ 2007  ║
+║ 11    ║ Adelie  ║ Torgersen ║ 37.8           ║ 17.1          ║ 186               ║ 3300        ║ NA  ║ 2007  ║
+║ 12    ║ Adelie  ║ Torgersen ║ 37.8           ║ 17.3          ║ 180               ║ 3700        ║ NA  ║ 2007  ║
+╚═══════╩═════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩═════╩═══════╝
 ```
 
 </details> 
@@ -486,7 +548,7 @@ df >> mutate(across(ends_with("mm"), lambda x: x.cast(pl.Float64, strict = False
 ╚════════════════╩═══════════════╩═══════════════════╝
 ```
 
-We also have access to the following helper functions within `where()`: `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean` and `is_temporal` 
+We also have access to the following helper functions within `where()`: `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean`, `is_temporal`, `is_null` and `is_cat` 
 
 ```python
 # Covert strings to uppercase
@@ -508,6 +570,82 @@ df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase())) \
 ║ ADELIE  ║ DREAM  ║ NA     ║
 ║ ADELIE  ║ BISCOE ║ MALE   ║
 ╚═════════╩════════╩════════╝
+```
+
+`mutate()` also allows for arithmetic operators (e.g. `+`, `*`, `/`) to be used across columns 
+
+```python
+df >> mutate(across(starts_with("bill"), lambda x: x.cast(pl.Float64, strict = False))) \
+    >> mutate(bill_area = _.bill_length_mm * _.bill_depth_mm, _after = "bill_depth_mm") \
+    >> select(starts_with("bill")) \
+    >> round() \
+    >> head() \
+    >> affiche()
+```
+```
+╔════════════════╦═══════════════╦═══════════╗
+║ bill_length_mm ║ bill_depth_mm ║ bill_area ║
+║ float64        ║ float64       ║ float64   ║
+╠════════════════╬═══════════════╬═══════════╣
+║ 39.1           ║ 18.7          ║ 731.17    ║
+║ 39.5           ║ 17.4          ║ 687.3     ║
+║ 40.3           ║ 18.0          ║ 725.4     ║
+║ null           ║ null          ║ null      ║
+║ 36.7           ║ 19.3          ║ 708.31    ║
+╚════════════════╩═══════════════╩═══════════╝
+```
+
+As of release `v0.3.0`, we can use `if_else()` for conditional column modification:
+
+```python
+df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False)) \
+    >> mutate(
+        size_category = if_else(
+            condition = (_.bill_length_mm > 45) & (_.bill_length_mm.is_not_null()),
+            true = "Large",
+            false = "Small"
+        )) \
+    >> select(_.bill_length_mm, _.size_category) \
+    >> distinct(_.size_category) \
+    >> affiche()    
+```
+```
+╔════════════════╦═══════════════╗
+║ bill_length_mm ║ size_category ║
+║ float64        ║ str           ║
+╠════════════════╬═══════════════╣
+║ 39.1           ║ Small         ║
+║ 46.0           ║ Large         ║
+╚════════════════╩═══════════════╝
+```
+
+As well as `case_when()` for multiple conditionals:
+
+```python
+df >> mutate(bill_length_mm = _.bill_length_mm.cast(pl.Float64, strict = False)) \
+    >> mutate(
+        size = case_when(
+            (_.bill_length_mm < 35, "Small"),
+            (_.bill_length_mm < 45, "Medium"),
+            (_.bill_length_mm >= 45, "Large"),
+            (_.bill_length_mm.is_null(), None),
+            default = "Unknown"
+        )
+    ) \
+    >> select(_.bill_length_mm, _.size) \
+    >> distinct(_.size) \
+    >> affiche()
+```
+```
+╔════════════════╦════════╗
+║ bill_length_mm ║ size   ║
+║ float64        ║ str    ║
+╠════════════════╬════════╣
+║ null           ║ null   ║
+║ 39.1           ║ Medium ║
+║ 46.0           ║ Large  ║
+║ 34.1           ║ Small  ║
+╚════════════════╩════════╝
 ```
 
 </details> 
@@ -536,8 +674,288 @@ df >> group_by(_.species) \
 
 </details> 
 
+#### 5. `pull()`
 
-#### 5. `head()`
+<details>
+<summary>View examples</summary>
+
+Similar to `R`, we can use `pull()` to retrieve a single value:
+
+```python
+# Pull the number of adelie penguins
+n = df >> filter(_.species == "Adelie") \
+    >> summarize(count = _.species.count()) \
+    >> pull(_.count)
+
+# Return it in a formatted string
+print(f"The number of adelie penguins is: {n}")
+```
+```
+The number of adelie penguins is: 152
+```
+
+</details> 
+
+#### 6. `join()`
+
+<details>
+<summary>View examples</summary>
+
+We can specify which type of join in the `how` argument:
+
+```python
+# First, define a new dataframe
+data = [
+    pl.Series("col1", [1, 2, 3, 4, 5], dtype = pl.Int64),
+    pl.Series("col2", [None, "happy", "sad", "somber", "morose"], dtype = pl.String),
+    pl.Series("year", [2010, 2010, 2010, 2010, 2010], dtype = pl.Int64)
+]
+
+df2 = pl.DataFrame(data)
+
+# Perform a right join between the two
+df3 = df >> join(
+    df2, 
+    left_on = "rowid",
+    right_on = "col1",
+    how = "right"
+) 
+
+# Then preview the joined table
+df3 >> relocate(_.col1, before = _.species) \
+    >> select(~(ends_with("right"))) \
+    >> rename(rowid = _.col1,
+              mood = _.col2) \
+    >> affiche()
+```
+```
+╔═══════╦═════════╦═══════════╦════════╦═══════╦════════╦════════════╗
+║ rowid ║ species ║ island    ║ sex    ║ year  ║ mood   ║ year_right ║
+║ int64 ║ str     ║ str       ║ str    ║ int64 ║ str    ║ int64      ║
+╠═══════╬═════════╬═══════════╬════════╬═══════╬════════╬════════════╣
+║ 1     ║ Adelie  ║ Torgersen ║ male   ║ 2007  ║ null   ║ 2010       ║
+║ 2     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ happy  ║ 2010       ║
+║ 3     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ sad    ║ 2010       ║
+║ 4     ║ Adelie  ║ Torgersen ║ NA     ║ 2007  ║ somber ║ 2010       ║
+║ 5     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ morose ║ 2010       ║
+╚═══════╩═════════╩═══════════╩════════╩═══════╩════════╩════════════╝
+```
+
+</details> 
+
+#### 7. `pivot_wider()`
+
+<details>
+<summary>View examples</summary>
+
+By default, `pivot_wider()` fills empty cells with `null`:
+
+```python
+df_wide = df >> \
+    pivot_wider(names_from = _.species, 
+                  values_from=_.bill_length_mm, 
+                  id_cols = _.rowid) 
+
+df_wide \
+    >> head(10) \
+    >> affiche()
+```
+
+```
+╔═══════╦════════╦════════╦═══════════╗
+║ rowid ║ Adelie ║ Gentoo ║ Chinstrap ║
+║ int64 ║ str    ║ str    ║ str       ║
+╠═══════╬════════╬════════╬═══════════╣
+║ 1     ║ 39.1   ║ null   ║ null      ║
+║ 2     ║ 39.5   ║ null   ║ null      ║
+║ 3     ║ 40.3   ║ null   ║ null      ║
+║ 4     ║ NA     ║ null   ║ null      ║
+║ 5     ║ 36.7   ║ null   ║ null      ║
+║ 6     ║ 39.3   ║ null   ║ null      ║
+║ 7     ║ 38.9   ║ null   ║ null      ║
+║ 8     ║ 39.2   ║ null   ║ null      ║
+║ 9     ║ 34.1   ║ null   ║ null      ║
+║ 10    ║ 42     ║ null   ║ null      ║
+╚═══════╩════════╩════════╩═══════════╝
+```
+
+</details> 
+
+#### 8. `pivot_longer()`
+
+<details>
+<summary>View examples</summary>
+
+By default, `pivot_longer()` pivots all columns:
+
+```python
+# Pivot all columns except rowid
+df_wide >> pivot_longer(cols = ~_.rowid, 
+                   names_to = "species", 
+                   values_to = "bill_length_mm") \
+    >> head(10) \
+    >> affiche()
+```
+```
+╔═══════╦═════════╦════════════════╗
+║ rowid ║ species ║ bill_length_mm ║
+║ int64 ║ str     ║ str            ║
+╠═══════╬═════════╬════════════════╣
+║ 1     ║ Adelie  ║ 39.1           ║
+║ 2     ║ Adelie  ║ 39.5           ║
+║ 3     ║ Adelie  ║ 40.3           ║
+║ 4     ║ Adelie  ║ NA             ║
+║ 5     ║ Adelie  ║ 36.7           ║
+║ 6     ║ Adelie  ║ 39.3           ║
+║ 7     ║ Adelie  ║ 38.9           ║
+║ 8     ║ Adelie  ║ 39.2           ║
+║ 9     ║ Adelie  ║ 34.1           ║
+║ 10    ║ Adelie  ║ 42             ║
+╚═══════╩═════════╩════════════════╝
+```
+
+</details> 
+
+#### 9. `unite()`
+
+<details>
+<summary>View examples</summary>
+
+By default, `unite()` drops the "from" columns:
+
+```python
+# Unite the island and species columns together:
+df_united = df >> unite(new_col = "island_species", 
+            from_cols = ["island", "species"], 
+            sep = ", ") \
+    >> group_by(_.island_species) \
+    >> summarize(avg_weight = _.body_mass_g.cast(pl.Float64, strict = False).mean().round(2)) 
+
+df_united.affiche()
+```
+```
+╔═══════════════════╦════════════╗
+║ island_species    ║ avg_weight ║
+║ str               ║ float64    ║
+╠═══════════════════╬════════════╣
+║ Biscoe, Gentoo    ║ 5076.02    ║
+║ Torgersen, Adelie ║ 3706.37    ║
+║ Dream, Chinstrap  ║ 3733.09    ║
+║ Biscoe, Adelie    ║ 3709.66    ║
+║ Dream, Adelie     ║ 3688.39    ║
+╚═══════════════════╩════════════╝
+```
+
+</details> 
+
+#### 10. `separate()`
+
+<details>
+<summary>View examples</summary>
+
+Similarly, `separate()` drops the "from" column by default:
+
+```python
+df_sep = df_united >> separate(col = "island_species", 
+               into = ["island", "species"], 
+               sep=", ",
+               regex = True) \
+
+df_sep.affiche()
+```
+```
+╔═══════════╦═══════════╦════════════╗
+║ island    ║ species   ║ avg_weight ║
+║ str       ║ str       ║ float64    ║
+╠═══════════╬═══════════╬════════════╣
+║ Biscoe    ║ Gentoo    ║ 5076.02    ║
+║ Torgersen ║ Adelie    ║ 3706.37    ║
+║ Dream     ║ Chinstrap ║ 3733.09    ║
+║ Biscoe    ║ Adelie    ║ 3709.66    ║
+║ Dream     ║ Adelie    ║ 3688.39    ║
+╚═══════════╩═══════════╩════════════╝
+```
+
+</details> 
+
+#### 11. `bind_cols()`
+
+<details>
+<summary>View examples</summary>
+
+The default behavior of `bind_cols()` is to append `_2` to columns with conflicting names:
+
+```python
+data = [
+    pl.Series("col1", [1, 2, 3, 4, 5], dtype = pl.Int64),
+    pl.Series("col2", [None, "happy", "sad", "somber", "morose"], dtype = pl.String),
+    pl.Series("year", [2010, 2010, 2010, 2010, 2010], dtype = pl.Int64)
+]
+
+df2 = pl.DataFrame(data)
+
+df >> head() \
+    >> bind_cols(df2) \
+    >> select(~(_.bill_length_mm | _.sex)) \
+    >> affiche()
+```
+```
+╔═══════╦═════════╦═══════════╦═══════╦═══════╦════════╦════════╗
+║ rowid ║ species ║ island    ║ year  ║ col1  ║ col2   ║ year_2 ║
+║ int64 ║ str     ║ str       ║ int64 ║ int64 ║ str    ║ int64  ║
+╠═══════╬═════════╬═══════════╬═══════╬═══════╬════════╬════════╣
+║ 1     ║ Adelie  ║ Torgersen ║ 2007  ║ 1     ║ null   ║ 2010   ║
+║ 2     ║ Adelie  ║ Torgersen ║ 2007  ║ 2     ║ happy  ║ 2010   ║
+║ 3     ║ Adelie  ║ Torgersen ║ 2007  ║ 3     ║ sad    ║ 2010   ║
+║ 4     ║ Adelie  ║ Torgersen ║ 2007  ║ 4     ║ somber ║ 2010   ║
+║ 5     ║ Adelie  ║ Torgersen ║ 2007  ║ 5     ║ morose ║ 2010   ║
+╚═══════╩═════════╩═══════════╩═══════╩═══════╩════════╩════════╝
+```
+
+</details> 
+
+#### 12. `bind_rows()`
+
+<details>
+<summary>View examples</summary>
+
+By default, `bind_rows()` fills missing cells with `null`:
+
+```python
+data = [
+    pl.Series("col1", [1, 2, 3, 4, 5], dtype = pl.Int64),
+    pl.Series("col2", [None, "happy", "sad", "somber", "morose"], dtype = pl.String),
+    pl.Series("year", [2010, 2010, 2010, 2010, 2010], dtype = pl.Int64)
+]
+
+df2 = pl.DataFrame(data)
+
+df >> bind_rows(df2) \
+    >> select(~(_.bill_length_mm | _.sex)) \
+    >> tail(10) \
+    >> affiche()
+```
+```
+╔═══════╦═══════════╦════════╦═══════╦═══════╦════════╗
+║ rowid ║ species   ║ island ║ year  ║ col1  ║ col2   ║
+║ int64 ║ str       ║ str    ║ int64 ║ int64 ║ str    ║
+╠═══════╬═══════════╬════════╬═══════╬═══════╬════════╣
+║ 340   ║ Chinstrap ║ Dream  ║ 2009  ║ null  ║ null   ║
+║ 341   ║ Chinstrap ║ Dream  ║ 2009  ║ null  ║ null   ║
+║ 342   ║ Chinstrap ║ Dream  ║ 2009  ║ null  ║ null   ║
+║ 343   ║ Chinstrap ║ Dream  ║ 2009  ║ null  ║ null   ║
+║ 344   ║ Chinstrap ║ Dream  ║ 2009  ║ null  ║ null   ║
+║ null  ║ null      ║ null   ║ 2010  ║ 1     ║ null   ║
+║ null  ║ null      ║ null   ║ 2010  ║ 2     ║ happy  ║
+║ null  ║ null      ║ null   ║ 2010  ║ 3     ║ sad    ║
+║ null  ║ null      ║ null   ║ 2010  ║ 4     ║ somber ║
+║ null  ║ null      ║ null   ║ 2010  ║ 5     ║ morose ║
+╚═══════╩═══════════╩════════╩═══════╩═══════╩════════╝
+```
+
+</details> 
+
+#### 13. `head()`
 
 <details>
 <summary>View examples</summary>
@@ -564,7 +982,7 @@ df >> head() \
 
 </details> 
 
-#### 6. `tail()`
+#### 14. `tail()`
 
 <details>
 <summary>View examples</summary>
@@ -589,7 +1007,7 @@ df >> tail(2) \
 
 </details> 
 
-#### 7. `slice()`
+#### 15. `slice()`
 
 <details>
 <summary>View examples</summary>
@@ -636,7 +1054,37 @@ df >> slice(9, 5) \
 
 </details> 
 
-#### 8. `distinct()`
+#### 16. `sample()`
+
+<details>
+<summary>View examples</summary>
+
+By default, `sample()` returns rows without replacement:
+
+```python
+df >> sample(10) \
+    >> affiche()
+```
+
+```
+╔═══════╦═══════════╦═══════════╦════════════════╦═══════════════╦═══════════════════╦═════════════╦════════╦═══════╗
+║ rowid ║ species   ║ island    ║ bill_length_mm ║ bill_depth_mm ║ flipper_length_mm ║ body_mass_g ║ sex    ║ year  ║
+║ int64 ║ str       ║ str       ║ str            ║ str           ║ str               ║ str         ║ str    ║ int64 ║
+╠═══════╬═══════════╬═══════════╬════════════════╬═══════════════╬═══════════════════╬═════════════╬════════╬═══════╣
+║ 332   ║ Chinstrap ║ Dream     ║ 52.2           ║ 18.8          ║ 197               ║ 3450        ║ male   ║ 2009  ║
+║ 222   ║ Gentoo    ║ Biscoe    ║ 50.7           ║ 15            ║ 223               ║ 5550        ║ male   ║ 2008  ║
+║ 156   ║ Gentoo    ║ Biscoe    ║ 50             ║ 15.2          ║ 218               ║ 5700        ║ male   ║ 2007  ║
+║ 149   ║ Adelie    ║ Dream     ║ 36             ║ 17.8          ║ 195               ║ 3450        ║ female ║ 2009  ║
+║ 34    ║ Adelie    ║ Dream     ║ 40.9           ║ 18.9          ║ 184               ║ 3900        ║ male   ║ 2007  ║
+║ 13    ║ Adelie    ║ Torgersen ║ 41.1           ║ 17.6          ║ 182               ║ 3200        ║ female ║ 2007  ║
+║ 340   ║ Chinstrap ║ Dream     ║ 55.8           ║ 19.8          ║ 207               ║ 4000        ║ male   ║ 2009  ║
+║ 58    ║ Adelie    ║ Biscoe    ║ 40.6           ║ 18.8          ║ 193               ║ 3800        ║ male   ║ 2008  ║
+║ 53    ║ Adelie    ║ Biscoe    ║ 35             ║ 17.9          ║ 190               ║ 3450        ║ female ║ 2008  ║
+║ 146   ║ Adelie    ║ Dream     ║ 39             ║ 18.7          ║ 185               ║ 3650        ║ male   ║ 2009  ║
+╚═══════╩═══════════╩═══════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╩════════╩═══════╝
+```
+
+#### 17. `distinct()`
 
 <details>
 <summary>View examples</summary>
@@ -665,7 +1113,7 @@ df >> select(_.island, _.species) \
 
 </details> 
 
-#### 9. `arrange()`
+#### 18. `arrange()`
 
 <details>
 <summary>View examples</summary>
@@ -715,7 +1163,7 @@ df >> filter(_.body_mass_g != "NA") \
 
 </details> 
 
-#### 10. `relocate()`
+#### 19. `relocate()`
 
 <details>
 <summary>View examples</summary>
@@ -743,7 +1191,7 @@ df >> relocate(_.sex, after = _.rowid) \
 
 </details> 
 
-#### 11. `rename()`
+#### 20. `rename()`
 
 <details>
 <summary>View examples</summary>
@@ -774,7 +1222,7 @@ df >> rename(row_id = _.rowid,
 
 </details> 
 
-#### 12. `round()`
+#### 21. `round()`
 
 <details>
 <summary>View examples</summary>
@@ -835,6 +1283,52 @@ df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
 ║ 75%        ║ 48.0           ║ 19.0          ║ 213.0             ║ 4750.0      ║
 ║ max        ║ 60.0           ║ 22.0          ║ 231.0             ║ 6300.0      ║
 ╚════════════╩════════════════╩═══════════════╩═══════════════════╩═════════════╝
+```
+
+</details> 
+
+#### 22. `drop_null()`
+
+<details>
+<summary>View examples</summary>
+
+For this first example, we'll introduce some `null` values:
+
+```python
+df >> mutate(year = _.year.replace("2007", None)) \
+    >> select(_.year) \
+    >> distinct() \
+    >> affiche()
+```
+```
+╔═══════╗
+║ year  ║
+║ int64 ║
+╠═══════╣
+║ 2009  ║
+║ null  ║
+║ 2008  ║
+╚═══════╝
+```
+
+Then when we'll introduce `drop_null()` 
+
+```python
+df >> mutate(year = _.year.replace("2007", None)) \
+    >> drop_null() \
+    >> select(_.year) \
+    >> distinct() \
+    >> affiche()
+
+```
+```
+╔═══════╗
+║ year  ║
+║ int64 ║
+╠═══════╣
+║ 2008  ║
+║ 2009  ║
+╚═══════╝
 ```
 
 </details> 

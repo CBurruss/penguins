@@ -1,6 +1,19 @@
 from penguins.core.symbolic import SymbolicAttr
 import polars as pl
 
+from penguins.utils.helpers import (
+    WhereSelector,
+    where,
+    is_numeric,
+    is_integer,
+    is_float,
+    is_string,
+    is_boolean,
+    is_temporal,
+    is_null,
+    is_cat
+)
+
 # Define Across class
 class Across:
     """
@@ -75,60 +88,6 @@ def _resolve_across_columns(cols, all_columns, df=None):
         return [cols]
     
     return []
-
-# Add where() handling within across()
-class WhereSelector:
-    """
-    Selects columns based on a predicate function applied to their data type.
-    
-    Used with where() to filter columns by type or other properties.
-    """
-    def __init__(self, predicate):
-        self.predicate = predicate
-
-def where(predicate):
-    """
-    Select columns where a predicate function returns True for their data type.
-    
-    predicate: Function that takes a Polars DataType and returns bool
-    
-    Usage:
-        df >> mutate(across(where(is_numeric), lambda x: x * 2))
-        df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase()))
-    """
-    return WhereSelector(predicate)
-
-# Predicate helper functions
-def is_numeric(dtype):
-    """Check if a Polars data type is numeric."""
-    return dtype in [
-        pl.Int8, pl.Int16, pl.Int32, pl.Int64,
-        pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64,
-        pl.Float32, pl.Float64
-    ]
-
-def is_integer(dtype):
-    """Check if a Polars data type is integer."""
-    return dtype in [
-        pl.Int8, pl.Int16, pl.Int32, pl.Int64,
-        pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64
-    ]
-
-def is_float(dtype):
-    """Check if a Polars data type is float."""
-    return dtype in [pl.Float32, pl.Float64]
-
-def is_string(dtype):
-    """Check if a Polars data type is string."""
-    return dtype == pl.String or dtype == pl.Utf8
-
-def is_boolean(dtype):
-    """Check if a Polars data type is boolean."""
-    return dtype == pl.Boolean
-
-def is_temporal(dtype):
-    """Check if a Polars data type is date/time related."""
-    return dtype in [pl.Date, pl.Datetime, pl.Time, pl.Duration]
 
 def mutate(*args, _before=None, _after=None, **kwargs):
     """

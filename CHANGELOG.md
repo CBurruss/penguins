@@ -2,6 +2,30 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.0* — 2025-11-06
+
+### Features
+- Dataframes now have the `count_null()` method for counting `null` values by column
+- Conditional row assignment with `if_else()` and `case_when()` is now supported in `mutate()` statements
+- New verb functions:
+  - `drop_null()` — remove rows with `null` values
+  - `pull()` — extract a single column as a series or scalar value
+  - `sample()` — return a sample of rows from a dataframe 
+  - `join()` — join two dataframes on a matching column  
+    - Type: "inner", "left", "right", "outer", "cross", "semi", "anti"
+  - `pivot_wider()` — pivot a dataframe from long to wide format 
+  - `pivot_longer()` — pivot a dataframe from wide to long format 
+  - `unite()` — combine multiple columns into one column
+  - `separate()` — split a column into multiple columns
+  - `bind_cols()` — bind the columns of two dataframes together
+  - `bind_rows()` — bind the rows of two dataframes together
+
+### Improvements
+- `mutate()` now allows for arithmetic operators (e.g. `+`, `*`, `/`) to be used across columns
+- `where()` now allows for the `is_null` and `is_cat` [for the categorical data type] parameters
+- `filter()` now has a helper function `row_contains()` for checking which rows in any columns contain given value[s]
+- Re-organized helper functions into their own module for cleaner imports
+
 ## *0.2.1* — 2025-11-04
 
 ### Improvements
@@ -42,10 +66,10 @@ Initial package release
 ## **_Unreleased_**
 
 ### Features
-- **Methods:** `count_na()`
-- **New verbs:** `if_else()`, `case_when()`, `*_join()`, `pivot_longer()`, `pivot_wider()`, `sample()`, `pull()`
-- **Data cleaning:** `drop_na()`, `fill_na()`, `coalesce_by()`
-- **Reshaping:** `unite()`, `separate()`, `bind_rows()`, `bind_cols()`
+- **Methods:** ~~`count_null()`~~
+- **New verbs:** ~~`if_else()`~~, ~~`case_when()`~~, ~~`join()`~~, ~~`pivot_longer()`~~, ~~`pivot_wider()`~~, ~~`sample()`~~, ~~`pull()`~~
+- **Data cleaning:** ~~`drop_null()`~~
+- **Reshaping:** ~~`unite()`~~, ~~`separate()`~~, ~~`bind_rows()`~~, ~~`bind_cols()`~~
 
 ### Improvements
-- **Additional handling:** `is_categorical()`, `is_null()`, `col_contains()`
+- **Additional handling:** ~~`is_categorical()`~~, ~~`is_null()`~~, ~~`row_contains()`~~

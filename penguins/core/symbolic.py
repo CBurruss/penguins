@@ -84,7 +84,7 @@ class SymbolicAttr:
         """
         return ColumnRange(self, other)
     
-    # Patch in custom not_in() function 
+    # Patch in custom not_in() method
     def not_in(self, values):
         """
         Check if values are NOT in the given list.
@@ -95,7 +95,7 @@ class SymbolicAttr:
         """
         return ~self._expr.is_in(values)
     
-    # Patch in cusotm not_like() function
+    # Patch in custom not_like() method
     def not_like(self, pattern):
         """
         Check if string does NOT contain the pattern.
@@ -105,6 +105,48 @@ class SymbolicAttr:
         Usage: df >> filter(_.col.not_like("pattern"))
         """
         return ~self._expr.str.contains(pattern)
+    
+    def __add__(self, other):
+        """Support + addition"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__add__(other)
+
+    def __sub__(self, other):
+        """Support - subtraction"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__sub__(other)
+
+    def __mul__(self, other):
+        """Support * multiplication"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__mul__(other)
+
+    def __truediv__(self, other):
+        """Support / division"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__truediv__(other)
+
+    def __floordiv__(self, other):
+        """Support // floor division"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__floordiv__(other)
+
+    def __mod__(self, other):
+        """Support % modulo"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__mod__(other)
+
+    def __pow__(self, other):
+        """Support ** exponentiation"""
+        if isinstance(other, SymbolicAttr):
+            other = other._expr
+        return self._expr.__pow__(other)
     
 # Establish symbolic class for polars dataframes
 class Symbolic:
