@@ -36,6 +36,7 @@ from penguins.verbs.unite import unite
 from penguins.verbs.separate import separate
 from penguins.verbs.bind_cols import bind_cols
 from penguins.verbs.bind_rows import bind_rows
+from penguins.verbs.reframe import reframe
 
 # utils + helper imports
 from penguins.utils.if_else import if_else
@@ -45,7 +46,7 @@ from penguins.utils.helpers import starts_with, ends_with, contains, where, is_n
     is_integer, is_float, is_string, is_boolean, is_temporal, is_null, is_cat
     
 # set version
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 # add to primary import 
 __all__ = ['_', 'Symbolic', 'select', 'mutate', 'filter', 'arrange', 'rename', 'group_by',
@@ -54,4 +55,4 @@ __all__ = ['_', 'Symbolic', 'select', 'mutate', 'filter', 'arrange', 'rename', '
            'ends_with', 'contains', 'across', 'where', 'is_numeric', 'is_integer', 'is_float', 
            'is_string', 'is_boolean', 'is_temporal', 'is_null', 'if_else', 'is_null', 'is_cat', 
            'case_when', 'join', 'pivot_longer', 'pivot_wider', 'unite', 'separate', 'bind_rows', 'bind_cols', 
-           'row_contains']
+           'row_contains', 'reframe']

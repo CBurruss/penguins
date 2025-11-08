@@ -50,25 +50,26 @@ As hinted at above, penguins gains most of its utility from its dplyr-styled fun
 3. `mutate()` — create new columns or modify existing ones
 4. `group_by()` —  group DataFrame by one or more columns
 5. `summarize()` — aggregate data, typically after `group_by()`
-6. `pull()` — extract a single column as a series or scalar value
-7. `join()` — join two dataframes on a matching column
+6. `reframe()` — create new rows based on group summaries, also typically used after `group_by()`
+7. `pull()` — extract a single column as a series or scalar value
+8. `join()` — join two dataframes on a matching column
     - How: "inner", "left", "right", "outer", "cross", "semi", "anti"
-8. `pivot_wider()` — pivot a dataframe from long to wide format
-9. `pivot_longer()` — pivot a dataframe from wide to long format
-10. `unite()` — combine multiple columns into one column
-11. `separate()` — split a column into multiple columns
-12. `bind_cols()` — bind the columns of two dataframes together
-13. `bind_rows()` — bind the rows of two dataframes together
-14. `head()` — return first n rows
-15. `tail()` — return last n rows
-16. `slice()` — select rows by position
-17. `sample()` — return a sample of rows from a dataframe
-18. `distinct()` — keep only unique rows based on specified columns
-19. `arrange()` — sort rows by column expressions
-20. `relocate()` — reorder columns in a DataFrame
-21. `rename()` — rename columns
-22. `round()` — round numeric columns to specified decimal places
-23. `drop_null()` — remove rows with `null` values
+9. `pivot_wider()` — pivot a dataframe from long to wide format
+10. `pivot_longer()` — pivot a dataframe from wide to long format
+11. `unite()` — combine multiple columns into one column
+12. `separate()` — split a column into multiple columns
+13. `bind_cols()` — bind the columns of two dataframes together
+15. `bind_rows()` — bind the rows of two dataframes together
+16. `head()` — return first n rows
+17. `tail()` — return last n rows
+18. `slice()` — select rows by position
+19. `sample()` — return a sample of rows from a dataframe
+20. `distinct()` — keep only unique rows based on specified columns
+21. `arrange()` — sort rows by column expressions
+22. `relocate()` — reorder columns in a DataFrame
+23. `rename()` — rename columns
+24. `round()` — round numeric columns to specified decimal places
+25. `drop_null()` — remove rows with `null` values
 
 ### 4. Helper functions
 
@@ -674,7 +675,34 @@ df >> group_by(_.species) \
 
 </details> 
 
-#### 5. `pull()`
+#### 5. `group_by()` + `reframe()`
+
+<details>
+<summary>View examples</summary>
+
+Unlike `summarize()`, `reframe()` in a `group_by()` creates new rows based on group summaries:
+
+```python
+df >> mutate(across(ends_with("mm|g"), lambda x: x.cast(pl.Float64, strict = False))) \
+    >> group_by(_.species) \
+    >> reframe(mean_bill = _.bill_length_mm.mean().round(2), 
+               mean_weight = _.body_mass_g.mean().round(2)) \
+    >> affiche()
+```
+```
+╔═══════════╦═══════════╦═════════════╗
+║ species   ║ mean_bill ║ mean_weight ║
+║ str       ║ float64   ║ float64     ║
+╠═══════════╬═══════════╬═════════════╣
+║ Adelie    ║ 38.79     ║ 3700.66     ║
+║ Gentoo    ║ 47.5      ║ 5076.02     ║
+║ Chinstrap ║ 48.83     ║ 3733.09     ║
+╚═══════════╩═══════════╩═════════════╝
+```
+
+</details> 
+
+#### 6. `pull()`
 
 <details>
 <summary>View examples</summary>
@@ -696,7 +724,7 @@ The number of adelie penguins is: 152
 
 </details> 
 
-#### 6. `join()`
+#### 7. `join()`
 
 <details>
 <summary>View examples</summary>
@@ -743,7 +771,7 @@ df3 >> relocate(_.col1, before = _.species) \
 
 </details> 
 
-#### 7. `pivot_wider()`
+#### 8. `pivot_wider()`
 
 <details>
 <summary>View examples</summary>
@@ -781,7 +809,7 @@ df_wide \
 
 </details> 
 
-#### 8. `pivot_longer()`
+#### 9. `pivot_longer()`
 
 <details>
 <summary>View examples</summary>
@@ -816,7 +844,7 @@ df_wide >> pivot_longer(cols = ~_.rowid,
 
 </details> 
 
-#### 9. `unite()`
+#### 10. `unite()`
 
 <details>
 <summary>View examples</summary>
@@ -848,7 +876,7 @@ df_united.affiche()
 
 </details> 
 
-#### 10. `separate()`
+#### 11. `separate()`
 
 <details>
 <summary>View examples</summary>
@@ -878,7 +906,7 @@ df_sep.affiche()
 
 </details> 
 
-#### 11. `bind_cols()`
+#### 12. `bind_cols()`
 
 <details>
 <summary>View examples</summary>
@@ -914,7 +942,7 @@ df >> head() \
 
 </details> 
 
-#### 12. `bind_rows()`
+#### 13. `bind_rows()`
 
 <details>
 <summary>View examples</summary>
@@ -955,7 +983,7 @@ df >> bind_rows(df2) \
 
 </details> 
 
-#### 13. `head()`
+#### 14. `head()`
 
 <details>
 <summary>View examples</summary>
@@ -982,7 +1010,7 @@ df >> head() \
 
 </details> 
 
-#### 14. `tail()`
+#### 15. `tail()`
 
 <details>
 <summary>View examples</summary>
@@ -1007,7 +1035,7 @@ df >> tail(2) \
 
 </details> 
 
-#### 15. `slice()`
+#### 16. `slice()`
 
 <details>
 <summary>View examples</summary>
@@ -1054,7 +1082,7 @@ df >> slice(9, 5) \
 
 </details> 
 
-#### 16. `sample()`
+#### 17. `sample()`
 
 <details>
 <summary>View examples</summary>
@@ -1086,7 +1114,7 @@ df >> sample(10) \
 
 </details> 
 
-#### 17. `distinct()`
+#### 18. `distinct()`
 
 <details>
 <summary>View examples</summary>
@@ -1115,7 +1143,7 @@ df >> select(_.island, _.species) \
 
 </details> 
 
-#### 18. `arrange()`
+#### 19. `arrange()`
 
 <details>
 <summary>View examples</summary>
@@ -1165,7 +1193,7 @@ df >> filter(_.body_mass_g != "NA") \
 
 </details> 
 
-#### 19. `relocate()`
+#### 20. `relocate()`
 
 <details>
 <summary>View examples</summary>
@@ -1193,7 +1221,7 @@ df >> relocate(_.sex, after = _.rowid) \
 
 </details> 
 
-#### 20. `rename()`
+#### 21. `rename()`
 
 <details>
 <summary>View examples</summary>
@@ -1224,7 +1252,7 @@ df >> rename(row_id = _.rowid,
 
 </details> 
 
-#### 21. `round()`
+#### 22. `round()`
 
 <details>
 <summary>View examples</summary>
@@ -1289,7 +1317,7 @@ df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
 
 </details> 
 
-#### 22. `drop_null()`
+#### 23. `drop_null()`
 
 <details>
 <summary>View examples</summary>

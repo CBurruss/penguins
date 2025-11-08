@@ -1,5 +1,6 @@
 from penguins.core.symbolic import SymbolicAttr, DeSelect, ColumnRange
 import polars as pl 
+import re
 
 from penguins.utils.helpers import (
     StartsWithSelector, 
@@ -50,15 +51,27 @@ def _resolve_column_spec(spec, all_columns, df=None):
     
     # Handle starts_with()
     if isinstance(spec, StartsWithSelector):
-        return [col for col in all_columns if col.startswith(spec.prefix)]
+        if spec.is_regex:
+            pattern = re.compile(f"({spec.prefix})$")
+            return [col for col in all_columns if pattern.search(col)]
+        else:
+            return [col for col in all_columns if col.startswith(spec.prefix)]
     
     # Handle ends_with()
     if isinstance(spec, EndsWithSelector):
-        return [col for col in all_columns if col.endswith(spec.suffix)]
+        if spec.is_regex:
+            pattern = re.compile(f"({spec.suffix})$")
+            return [col for col in all_columns if pattern.search(col)]
+        else:
+            return [col for col in all_columns if col.endswith(spec.suffix)]
     
     # Handle contains()
     if isinstance(spec, ContainsSelector):
-        return [col for col in all_columns if spec.substring in col]
+        if spec.is_regex:
+            pattern = re.compile(f"({spec.substring})$")
+            return [col for col in all_columns if pattern.search(col)]
+        else:
+            return [col for col in all_columns if spec.substring in col]
     
     return []
 

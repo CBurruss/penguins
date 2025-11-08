@@ -76,7 +76,8 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
         "categorical": "cat",
         "boolean": "bool",
         "object": "obj",
-        "decimal": "dec"
+        "decimal": "dec",
+        "datetime(time_unit='us', time_zone=none)": "datetime"
     }
 
     col_types = [type_abbrev.get(dtype.lower(), dtype) for dtype in col_types]

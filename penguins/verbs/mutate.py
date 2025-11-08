@@ -1,5 +1,6 @@
 from penguins.core.symbolic import SymbolicAttr
 import polars as pl
+import re
 
 from penguins.utils.helpers import (
     WhereSelector,
@@ -62,13 +63,28 @@ def _resolve_across_columns(cols, all_columns, df=None):
     
     # Handle selector functions
     if isinstance(cols, StartsWithSelector):
-        return [col for col in all_columns if col.startswith(cols.prefix)]
+        if isinstance(cols, StartsWithSelector):
+            if cols.is_regex:
+                pattern = re.compile(f"({cols.prefix})$")
+                return [col for col in all_columns if pattern.search(col)]
+            else:
+                return [col for col in all_columns if col.startswith(cols.prefix)]
     
     if isinstance(cols, EndsWithSelector):
-        return [col for col in all_columns if col.endswith(cols.suffix)]
+        if isinstance(cols, EndsWithSelector):
+            if cols.is_regex:
+                pattern = re.compile(f"({cols.suffix})$")
+                return [col for col in all_columns if pattern.search(col)]
+            else:
+                return [col for col in all_columns if col.endswith(cols.suffix)]
     
     if isinstance(cols, ContainsSelector):
-        return [col for col in all_columns if cols.substring in col]
+        if isinstance(cols, ContainsSelector):
+            if cols.is_regex:
+                pattern = re.compile(f"({cols.substring})$")
+                return [col for col in all_columns if pattern.search(col)]
+            else:
+                return [col for col in all_columns if cols.substring in col]
     
     # Handle list of columns
     if isinstance(cols, list):

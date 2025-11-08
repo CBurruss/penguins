@@ -2,6 +2,16 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.1* — 2025-11-07
+
+### Features
+- Adds verb `reframe()` for creating new summary rows based on group summaries
+
+### Improvements
+- Helper functions — `starts_with()`, `ends_with()`, and `contains()` — now allow for matching on multiple expressions with the OR operator `|`
+    - e.g. df >> select(starts_with("a|b"))
+- `affiche()` now handles datetime data type abbreviations
+
 ## *0.3.0* — 2025-11-06
 
 ### Features

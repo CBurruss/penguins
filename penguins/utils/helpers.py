@@ -1,4 +1,6 @@
+from penguins.core.symbolic import DeSelect
 import polars as pl
+import re
 
 # Selector classes
 class StartsWithSelector:
@@ -11,12 +13,14 @@ class StartsWithSelector:
         return DeSelect(self)
 
 class EndsWithSelector:
-    """Selects columns ending with a suffix."""
+    """Selects columns ending with a suffix or matching a regex pattern."""
     def __init__(self, suffix):
         self.suffix = suffix
+        # Check if the suffix contains regex special characters
+        self.is_regex = bool(re.search(r'[|()[\]{}^$*+?\\.]', suffix))
     
     def __invert__(self):
-        from penguins.core.symbolic import DeSelect
+        """Support ~ operator for deselection."""
         return DeSelect(self)
 
 class ContainsSelector:
