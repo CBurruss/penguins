@@ -2,6 +2,11 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.2* — 2025-11-08
+
+### Fixes
+- Fixed regex search for `starts_with()` and `contains()` helpers
+
 ## *0.3.1* — 2025-11-07
 
 ### Features

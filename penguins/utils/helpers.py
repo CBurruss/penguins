@@ -7,9 +7,10 @@ class StartsWithSelector:
     """Selects columns starting with a prefix."""
     def __init__(self, prefix):
         self.prefix = prefix
+        # Check if the suffix contains regex special characters
+        self.is_regex = bool(re.search(r'[|()[\]{}^$*+?\\.]', prefix))
     
     def __invert__(self):
-        from penguins.core.symbolic import DeSelect
         return DeSelect(self)
 
 class EndsWithSelector:
@@ -27,9 +28,10 @@ class ContainsSelector:
     """Selects columns containing a substring."""
     def __init__(self, substring):
         self.substring = substring
+        # Check if the suffix contains regex special characters
+        self.is_regex = bool(re.search(r'[|()[\]{}^$*+?\\.]', substring))
     
     def __invert__(self):
-        from penguins.core.symbolic import DeSelect
         return DeSelect(self)
 
 class WhereSelector:
