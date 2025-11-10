@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name="penguins",
-    version="0.3.2",
+    version="0.3.3",
     include_package_data=True,
     package_data={
         'penguins.data': ['*.csv'],

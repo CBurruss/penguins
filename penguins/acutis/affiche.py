@@ -4,7 +4,7 @@ import re
 import math
 
 """
-affiche extension for Polars DataFrames.
+affiche extension for Polars DataFrames and LazyFrames.
 
 This module monkey-patches the affiche() method onto pl.DataFrame.
 The patch is applied automatically when this module is imported.
@@ -26,9 +26,12 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
     Usage:
         df.affiche()
     """
+    # Collect LazyFrame if needed
+    if isinstance(self, pl.LazyFrame):
+        df = self.collect()
+    else:
+        df = self
     
-    df = self
-
     # Handle empty DataFrame
     if df.shape[1] == 0 or df.shape[0] == 0:
         msg = "That table doesn't exist!"
@@ -175,13 +178,14 @@ def affiche(self, align="left", na_color="\033[91;3m", theme="newspaper"):
 
     return None
 
-# Monkey-patch Polars DataFrame
+# Monkey-patch Polars DataFrame and LazyFrame
 pl.DataFrame.affiche = affiche
+pl.LazyFrame.affiche = affiche 
 
 # Define the affiche() function
 def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
     """
-    Display a Polars DataFrame with formatted table borders and styling.
+    Display a Polars DataFrame or LazyFrame with formatted table borders and styling.
     
     Args:
         align: text alignment ("left", "center", "right")
@@ -193,6 +197,10 @@ def affiche(align="left", na_color="\033[91;3m", theme="newspaper"):
     """
     def _affiche(df):
 
+        # Collect LazyFrame if needed
+        if isinstance(df, pl.LazyFrame):
+            df = df.collect()
+            
         # Handle empty DataFrame
         if df.shape[1] == 0 or df.shape[0] == 0:
             msg = "That table doesn't exist!"

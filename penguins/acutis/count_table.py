@@ -1,13 +1,14 @@
 # Define the count_table() method
 """
-count_table extension for Polars Series and DataFrame.
+count_table extension for Polars Series, DataFrame and LazyFrame.
 
 This module monkey-patches the count_table() method onto pl.Series and pl.DataFrame.
 The patch is applied automatically when this module is imported.
 
 Usage:
-    series.count_table()
-    df["column"].count_table()
+    For Series: series.count_table()
+    For DataFrame: df["column"].count_table()
+    For LazyFrame: lf.select("column").count_table()
 """
 import polars as pl
 
@@ -17,9 +18,14 @@ def count_table(self):
     
     For Series: series.count_table()
     For DataFrame: df["column"].count_table()
+    For LazyFrame: lf.select("column").count_table()
     """
-    # Handle DataFrame - take first column
-    if isinstance(self, pl.DataFrame):
+    # Handle DataFrame/LazyFrame - take first column
+    if isinstance(self, (pl.DataFrame, pl.LazyFrame)):
+        # Collect LazyFrame if needed
+        if isinstance(self, pl.LazyFrame):
+            self = self.collect()
+            
         if self.shape[1] != 1:
             raise ValueError("count_table() requires a DataFrame with exactly one column")
         series = self[self.columns[0]]
@@ -55,3 +61,4 @@ def count_table(self):
 # Monkey-patch onto both Series and DataFrame
 pl.Series.count_table = count_table
 pl.DataFrame.count_table = count_table
+pl.LazyFrame.count_table = count_table  

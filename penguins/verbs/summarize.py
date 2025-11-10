@@ -26,7 +26,7 @@ def summarize(**kwargs):
                 exprs.append(pl.lit(expr).alias(new_name))
         
         # Check if grouped or ungrouped
-        if isinstance(df_or_group, pl.dataframe.group_by.GroupBy):
+        if isinstance(df_or_group, (pl.dataframe.group_by.GroupBy, pl.lazyframe.group_by.LazyGroupBy)):
             # Grouped: use agg()
             return df_or_group.agg(*exprs)
         else:

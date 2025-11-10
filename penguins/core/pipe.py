@@ -43,3 +43,7 @@ pl.DataFrame.__rshift__ = _pipe_rshift
 
 # Make Polars GroupBy pipeable
 pl.dataframe.group_by.GroupBy.__rshift__ = _pipe_rshift
+
+# Add LazyFrame support
+pl.LazyFrame.__rshift__ = _pipe_rshift
+pl.lazyframe.group_by.LazyGroupBy.__rshift__ = _pipe_rshift

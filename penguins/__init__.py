@@ -46,7 +46,7 @@ from penguins.utils.helpers import starts_with, ends_with, contains, where, is_n
     is_integer, is_float, is_string, is_boolean, is_temporal, is_null, is_cat
     
 # set version
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 # add to primary import 
 __all__ = ['_', 'Symbolic', 'select', 'mutate', 'filter', 'arrange', 'rename', 'group_by',

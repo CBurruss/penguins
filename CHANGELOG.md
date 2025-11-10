@@ -2,6 +2,11 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.3* — 2025-11-09
+
+### Features
+- Added compatibly for working with LazyFrames (some bugs to be expected)
+
 ## *0.3.2* — 2025-11-08
 
 ### Fixes
