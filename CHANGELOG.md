@@ -2,6 +2,11 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.5* — 2025-11-11
+
+### Fixes
+- `starts_with()` and `contains()` now correctly handle regex patterns 
+
 ## *0.3.4* — 2025-11-10
 
 ### Improvements

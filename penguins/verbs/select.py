@@ -56,7 +56,7 @@ def _resolve_column_spec(spec, all_columns, df=None):
     # Handle starts_with()
     if isinstance(spec, StartsWithSelector):
         if spec.is_regex:
-            pattern = re.compile(f"({spec.prefix})$")
+            pattern = re.compile(f"^({spec.prefix})")
             return [col for col in all_columns if pattern.search(col)]
         else:
             return [col for col in all_columns if col.startswith(spec.prefix)]
@@ -72,7 +72,7 @@ def _resolve_column_spec(spec, all_columns, df=None):
     # Handle contains()
     if isinstance(spec, ContainsSelector):
         if spec.is_regex:
-            pattern = re.compile(f"({spec.substring})$")
+            pattern = re.compile(f"({spec.substring})")
             return [col for col in all_columns if pattern.search(col)]
         else:
             return [col for col in all_columns if spec.substring in col]
