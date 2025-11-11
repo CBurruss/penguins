@@ -18,12 +18,18 @@ def separate(col, into, sep, regex=False, drop=True, fill="right"):
     Usage: df >> separate(_.col, into=["a", "b"], sep="_")
     """
     def _separate(df):
-        # Extract column name
+    # Extract column name
         col_name = col.name if isinstance(col, SymbolicAttr) else col
-        
-        # Get column index to insert new columns to the right
-        col_idx = df.columns.index(col_name)
-        
+    
+        # Check if we're working with a LazyFrame
+        is_lazy = isinstance(df, pl.LazyFrame)
+    
+        # Get column index - use collect_schema() for LazyFrames
+        if is_lazy:
+            col_idx = df.collect_schema().names().index(col_name)
+        else:
+            col_idx = df.columns.index(col_name)
+    
         # Split the column
         if regex:
             split_expr = pl.col(col_name).str.split(sep)
@@ -32,31 +38,37 @@ def separate(col, into, sep, regex=False, drop=True, fill="right"):
             import re
             escaped_sep = re.escape(sep)
             split_expr = pl.col(col_name).str.split(escaped_sep)
-        
+    
         # Create list column
         result = df.with_columns(split_expr.alias("__temp_split__"))
-        
+    
         # Check split counts and warn if mismatched
-        split_lengths = result.select(
-            pl.col("__temp_split__").list.len().alias("len")
-        )["len"]
-        
+        # For LazyFrames, collect only the length column to check
+        if is_lazy:
+            split_lengths = result.select(
+                pl.col("__temp_split__").list.len().alias("len")
+            ).collect()["len"]
+        else:
+            split_lengths = result.select(
+                pl.col("__temp_split__").list.len().alias("len")
+            )["len"]
+    
         max_len = split_lengths.max()
         min_len = split_lengths.min()
         expected_len = len(into)
-        
+    
         if max_len > expected_len:
             warnings.warn(
                 f"Some splits produced {max_len} parts but only {expected_len} columns requested. "
                 f"Extra parts will be ignored."
             )
-        
+    
         if min_len < expected_len and fill == "error":
             raise ValueError(
                 f"Some splits produced fewer than {expected_len} parts. "
                 f"Use fill='right' or fill='left' to handle this."
             )
-        
+    
         # Extract each position into new columns
         new_cols = []
         for i, col_name_new in enumerate(into):
@@ -73,14 +85,19 @@ def separate(col, into, sep, regex=False, drop=True, fill="right"):
                 new_cols.append(
                     pl.col("__temp_split__").list.get(i).alias(col_name_new)
                 )
-        
+    
         result = result.with_columns(new_cols)
-        
+    
         # Drop temporary column
         result = result.drop("__temp_split__")
-        
+    
         # Reorder columns to insert new ones after original
-        original_cols = df.columns
+        # Use collect_schema().names() for LazyFrames
+        if is_lazy:
+            original_cols = df.collect_schema().names()
+        else:
+            original_cols = df.columns
+        
         if drop:
             # Remove source column and insert new ones at its position
             reordered = (
@@ -95,9 +112,9 @@ def separate(col, into, sep, regex=False, drop=True, fill="right"):
                 into + 
                 original_cols[col_idx + 1:]
             )
-        
+    
         result = result.select(reordered)
-        
+    
         return result
     
     return _separate

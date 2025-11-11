@@ -2,6 +2,19 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.4* — 2025-11-10
+
+### Improvements
+- `select()`, `mutate()` and `round()` use the more efficient `collect_schema()` for retrieving column names for LazyFrames
+
+### Fixes
+- The following functions now play nice with LazyFrames (I knew there'd be bugs):
+  - `pasteurize()` 
+  - `pull()` 
+  - `separate()` 
+  - `bind_cols()` 
+  - `bind_rows()
+
 ## *0.3.3* — 2025-11-09
 
 ### Features

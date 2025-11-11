@@ -59,7 +59,11 @@ def _resolve_across_columns(cols, all_columns, df=None):
     if isinstance(cols, WhereSelector):
         if df is None:
             raise ValueError("DataFrame required for where() selector")
-        return [col for col in all_columns if cols.predicate(df[col].dtype)]
+        if isinstance(df, pl.LazyFrame):
+            schema = df.collect_schema()
+            return [col for col in all_columns if cols.predicate(schema[col])]
+        else:
+            return [col for col in all_columns if cols.predicate(df[col].dtype)]
     
     # Handle selector functions
     if isinstance(cols, StartsWithSelector):
@@ -126,7 +130,10 @@ def mutate(*args, _before=None, _after=None, **kwargs):
         # Handle positional Across objects
         for arg in args:
             if isinstance(arg, Across):
-                target_cols = _resolve_across_columns(arg.cols, df.columns, df)
+                if isinstance(df, pl.LazyFrame):
+                    target_cols = _resolve_across_columns(arg.cols, df.collect_schema().names(), df)
+                else:
+                    target_cols = _resolve_across_columns(arg.cols, df.columns, df)
                 
                 for col_name in target_cols:
                     col_expr = pl.col(col_name)
@@ -178,8 +185,16 @@ def mutate(*args, _before=None, _after=None, **kwargs):
         # If positioning is specified, reorder columns
         if _before is not None or _after is not None:
             new_col_names = list(processed_kwargs.keys())
-            existing_cols = df.columns
-            other_cols = [c for c in result.columns if c not in new_col_names]
+            
+            if isinstance(df, pl.LazyFrame):
+                existing_columns = df.collect_schema().names()
+            else:
+                existing_columns = df.columns
+            
+            if isinstance(result, pl.LazyFrame):
+                other_cols = [c for c in result.collect_schema().names() if c not in new_col_names]
+            else:
+                other_cols = [c for c in result.columns if c not in new_col_names]
             
             if _before is not None:
                 anchor_idx = other_cols.index(_before)

@@ -36,10 +36,13 @@ def pasteurize(df):
         columns = df.columns
         dtypes = df.dtypes
     
-    df = df.rename({col: clean_name(col) for col in columns})
-        
+    # Create mapping of old -> new column names
+    rename_map = {col: clean_name(col) for col in columns}
+    df = df.rename(rename_map)
+    
     # Clean string columns: strip whitespace, replace NA variants, apply title case
-    string_cols = [col for col, dtype in zip(columns, dtypes) if dtype == pl.String]
+    # Use the NEW (cleaned) column names
+    string_cols = [rename_map[col] for col, dtype in zip(columns, dtypes) if dtype == pl.String]
     
     for col in string_cols:
         df = df.with_columns(

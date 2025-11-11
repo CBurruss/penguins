@@ -1,4 +1,5 @@
 from penguins.core.symbolic import SymbolicAttr
+import polars as pl
 import warnings
 
 def bind_cols(*dfs, suffix="_2"):
@@ -16,25 +17,37 @@ def bind_cols(*dfs, suffix="_2"):
     def _bind_cols(df):
         result = df
         
-        # Get the max row count for padding
-        all_dfs = [df] + list(dfs)
-        max_rows = max(d.height for d in all_dfs)
+        # Check if working with LazyFrames
+        is_lazy = isinstance(df, pl.LazyFrame)
         
-        if df.height < max_rows:
-            warnings.warn(
-                f"Row count mismatch: primary DataFrame has {df.height} rows "
-                f"but maximum is {max_rows}. Filling with nulls."
-            )
-        
-        for other_df in dfs:
-            if other_df.height < max_rows:
+        # Only check row counts for DataFrames
+        if not is_lazy:
+            all_dfs = [df] + list(dfs)
+            max_rows = max(d.height for d in all_dfs)
+            
+            if df.height < max_rows:
                 warnings.warn(
-                    f"Row count mismatch: a DataFrame has {other_df.height} rows "
+                    f"Row count mismatch: primary DataFrame has {df.height} rows "
                     f"but maximum is {max_rows}. Filling with nulls."
                 )
             
+            for other_df in dfs:
+                if other_df.height < max_rows:
+                    warnings.warn(
+                        f"Row count mismatch: a DataFrame has {other_df.height} rows "
+                        f"but maximum is {max_rows}. Filling with nulls."
+                    )
+        
+        for other_df in dfs:
             # Check for duplicate column names
-            duplicate_cols = set(result.columns) & set(other_df.columns)
+            if is_lazy:
+                result_cols = result.collect_schema().names()
+                other_cols = other_df.collect_schema().names()
+            else:
+                result_cols = result.columns
+                other_cols = other_df.columns
+                
+            duplicate_cols = set(result_cols) & set(other_cols)
             
             if duplicate_cols:
                 # Rename duplicates in other_df
@@ -46,7 +59,7 @@ def bind_cols(*dfs, suffix="_2"):
                     new_name = f"{base_name}{suffix}"
                     
                     # Keep incrementing if still duplicate
-                    while new_name in result.columns or new_name in other_df.columns:
+                    while new_name in result_cols or new_name in other_cols:
                         counter += 1
                         new_name = f"{base_name}_{counter}"
                     
@@ -55,7 +68,13 @@ def bind_cols(*dfs, suffix="_2"):
                 other_df = other_df.rename(rename_map)
             
             # Stack horizontally
-            result = result.hstack(other_df)
+            if is_lazy:
+                # Convert other_df to LazyFrame if needed
+                if not isinstance(other_df, pl.LazyFrame):
+                    other_df = other_df.lazy()
+                result = pl.concat([result, other_df], how="horizontal")
+            else:
+                result = result.hstack(other_df)
         
         return result
     

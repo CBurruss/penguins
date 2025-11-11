@@ -1,4 +1,5 @@
 from penguins.core.symbolic import SymbolicAttr
+import polars as pl
 
 # Define the pull() verb
 def pull(column, to_series=False):
@@ -20,11 +21,15 @@ def pull(column, to_series=False):
         else:
             col_name = column
         
-        series = df[col_name]
+        if isinstance(df, pl.LazyFrame):
+            series = df.select(col_name).collect().to_series()
+        else:
+            series = df[col_name]
         
         # If single value and not explicitly requesting series, return scalar
         if not to_series and len(series) == 1:
             return series[0]
         
         return series
-    return _pull
+    
+    return _pull  

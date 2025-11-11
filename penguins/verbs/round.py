@@ -16,11 +16,19 @@ def round(*args, decimals=2):
         if not args:
             # Round all numeric columns
             numeric_types = [pl.Float32, pl.Float64, pl.Int8, pl.Int16, pl.Int32, pl.Int64]
-            cols_to_round = [
-                pl.col(col).round(decimals).alias(col)
-                for col, dtype in zip(df.columns, df.dtypes)
-                if dtype in numeric_types
-            ]
+            if isinstance(df, pl.LazyFrame):
+                schema = df.collect_schema()
+                cols_to_round = [
+                    pl.col(col).round(decimals).alias(col)
+                    for col, dtype in schema.items()
+                    if dtype in numeric_types
+                ]
+            else:
+                cols_to_round = [
+                    pl.col(col).round(decimals).alias(col)
+                    for col, dtype in zip(df.columns, df.dtypes)
+                    if dtype in numeric_types
+                ]
             if cols_to_round:
                 return df.with_columns(cols_to_round)
             return df

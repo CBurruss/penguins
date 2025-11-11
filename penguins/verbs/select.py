@@ -12,7 +12,7 @@ from penguins.utils.helpers import (
 )
 
 # Define function for handling conflicts
-def _resolve_column_spec(spec, all_columns, df=None):
+def _resolve_column_spec(spec, all_columns, df=None): 
     """
     Resolve a column specification to a list of column names.
     
@@ -29,7 +29,11 @@ def _resolve_column_spec(spec, all_columns, df=None):
     if isinstance(spec, WhereSelector):
         if df is None:
             raise ValueError("DataFrame required for where() selector")
-        return [col for col in all_columns if spec.predicate(df[col].dtype)]
+        if isinstance(df, pl.LazyFrame):
+            schema = df.collect_schema()
+            return [col for col in all_columns if spec.predicate(schema[col])]
+        else:
+            return [col for col in all_columns if spec.predicate(df[col].dtype)]
     
     # Handle SymbolicAttr
     if isinstance(spec, SymbolicAttr):
@@ -78,7 +82,7 @@ def _resolve_column_spec(spec, all_columns, df=None):
 # Modified select() verb
 def select(*cols):
     """
-    Select specific columns from the DataFrame.
+    Select specific columns from a DataFrame or LazyFrame.
     
     Supports:
     - Column names as strings or SymbolicAttr objects
@@ -88,10 +92,15 @@ def select(*cols):
     
     *cols: Variable number of column specifications
     
-    Returns a function that performs the selection on a DataFrame.
+    Returns a function that performs the selection on a DataFrame or LazyFrame.
     """
     def _select(df):
-        all_columns = df.columns
+        # Handle schema access efficiently for LazyFrames
+        if isinstance(df, pl.LazyFrame):
+            all_columns = df.collect_schema().names()
+        else:
+            all_columns = df.columns
+            
         selected_cols = []
         excluded_cols = []
         

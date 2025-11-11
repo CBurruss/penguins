@@ -93,6 +93,9 @@ from importlib.resources import files
 data_path = files('penguins.data').joinpath('penguins.csv')
 df = pl.read_csv(data_path)
 
+# Also define a LazyFrame 
+lf = pl.scan_csv(data_path)
+
 # Preview the penguins table
 df.head(5) >> print
 ```
@@ -145,7 +148,6 @@ df.head(5).affiche()
 ```python
 df["island"].count_table().affiche()
 ```
-
 ```
 ╔═══════════╦════════╦═════════╗
 ║ island    ║ count  ║ percent ║
@@ -156,9 +158,26 @@ df["island"].count_table().affiche()
 ║ Torgersen ║ 52     ║ 15%     ║
 ╚═══════════╩════════╩═════════╝
 ```
+
+Note: LazyFrames require the `select()` method call:
+
+```python
+lf.select("island").count_table().affiche()
+```
+```
+╔═══════════╦════════╦═════════╗
+║ island    ║ count  ║ percent ║
+║ str       ║ uint32 ║ str     ║
+╠═══════════╬════════╬═════════╣
+║ Biscoe    ║ 168    ║ 49%     ║
+║ Dream     ║ 124    ║ 36%     ║
+║ Torgersen ║ 52     ║ 15%     ║
+╚═══════════╩════════╩═════════╝
+```
+
 </details> 
 
-#### 2. `count_null()`
+#### 3. `count_null()`
 
 <details>
 <summary>View examples</summary>
@@ -528,7 +547,7 @@ df >> mutate(across([_.species, _.island], lambda x: x.str.to_lowercase())) \
 ╚═════════╩═══════════╝
 ```
 
-We can even use the selector helpers — `starts_with()`, `ends_with()` and `contains()` — within our `where()` call:
+We can even use the selector helpers — `starts_with()`, `ends_with()` and `contains()` — within our `across()` call:
 
 ```python
 df >> mutate(across(ends_with("mm"), lambda x: x.cast(pl.Float64, strict = False))) \
@@ -742,6 +761,7 @@ data = [
 df2 = pl.DataFrame(data)
 
 # Perform a right join between the two
+# Note, when joining a LazyFrame with a DataFrame, specify df2.lazy()
 df3 = df >> join(
     df2, 
     left_on = "rowid",
@@ -751,22 +771,22 @@ df3 = df >> join(
 
 # Then preview the joined table
 df3 >> relocate(_.col1, before = _.species) \
-    >> select(~(ends_with("right"))) \
+    >> select(~(ends_with("right")), ~(_.bill_length_mm | _.body_mass_g)) \
     >> rename(rowid = _.col1,
               mood = _.col2) \
     >> affiche()
 ```
 ```
-╔═══════╦═════════╦═══════════╦════════╦═══════╦════════╦════════════╗
-║ rowid ║ species ║ island    ║ sex    ║ year  ║ mood   ║ year_right ║
-║ int64 ║ str     ║ str       ║ str    ║ int64 ║ str    ║ int64      ║
-╠═══════╬═════════╬═══════════╬════════╬═══════╬════════╬════════════╣
-║ 1     ║ Adelie  ║ Torgersen ║ male   ║ 2007  ║ null   ║ 2010       ║
-║ 2     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ happy  ║ 2010       ║
-║ 3     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ sad    ║ 2010       ║
-║ 4     ║ Adelie  ║ Torgersen ║ NA     ║ 2007  ║ somber ║ 2010       ║
-║ 5     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ morose ║ 2010       ║
-╚═══════╩═════════╩═══════════╩════════╩═══════╩════════╩════════════╝
+╔═══════╦═════════╦═══════════╦════════╦═══════╦════════╗
+║ rowid ║ species ║ island    ║ sex    ║ year  ║ mood   ║
+║ int64 ║ str     ║ str       ║ str    ║ int64 ║ str    ║
+╠═══════╬═════════╬═══════════╬════════╬═══════╬════════╣
+║ 1     ║ Adelie  ║ Torgersen ║ male   ║ 2007  ║ null   ║
+║ 2     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ happy  ║
+║ 3     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ sad    ║
+║ 4     ║ Adelie  ║ Torgersen ║ NA     ║ 2007  ║ somber ║
+║ 5     ║ Adelie  ║ Torgersen ║ female ║ 2007  ║ morose ║
+╚═══════╩═════════╩═══════════╩════════╩═══════╩════════╝
 ```
 
 </details> 
@@ -779,6 +799,7 @@ df3 >> relocate(_.col1, before = _.species) \
 By default, `pivot_wider()` fills empty cells with `null`:
 
 ```python
+# Note, make sure to call `collect()` if pivoting a LazyFrame
 df_wide = df >> \
     pivot_wider(names_from = _.species, 
                   values_from=_.bill_length_mm, 
@@ -818,6 +839,7 @@ By default, `pivot_longer()` pivots all columns:
 
 ```python
 # Pivot all columns except rowid
+# Note, make sure to call `collect()` if pivoting a LazyFrame
 df_wide >> pivot_longer(cols = ~_.rowid, 
                    names_to = "species", 
                    values_to = "bill_length_mm") \
@@ -925,6 +947,7 @@ df2 = pl.DataFrame(data)
 df >> head() \
     >> bind_cols(df2) \
     >> select(~(_.bill_length_mm | _.sex)) \
+    >> head() \
     >> affiche()
 ```
 ```
@@ -1227,7 +1250,6 @@ df >> relocate(_.sex, after = _.rowid) \
 <summary>View examples</summary>
 
 Like siuba, `rename()` expects `new_name = _.old_name`
-
 
 ```python
 df >> rename(row_id = _.rowid, 
