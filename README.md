@@ -29,44 +29,41 @@ At its core, penguins provides a dplyr-flavored interface for polars through two
 
 ### 2. Acutis methods
 
-Unlike its more principled pandas counterpart (siuba), penguins takes the [careless] liberty of extending polars objects with both implicit and explicit methods! Each of these were ported from my [acutis](https://github.com/CBurruss/acutis) R package and provide handy functionality for typical data processsing and handling. 
+Unlike its more principled pandas counterpart (siuba), penguins takes the liberty of extending polars objects with both implicitly imported methods. Each of these were ported from my [acutis](https://github.com/CBurruss/acutis) R package and provide handy functionality for typical data processsing and handling. 
 
-**Explicit import required:**
- - `affiche()` — display a Polars DataFrame with aethetic table borders and styling (from the French *affiche* to display something)
-     - As a bonus, this is also provided as a function! 
- - `count_table()` — create a frequency table with counts and percentages
- - `count_null()` — create a summary table counting `null` values for each column in a DataFrame
- - `pasteurize()` — clean a DataFrame by removing empty rows, duplicates, and standardizing column names
-
-**Implicilty patched in:**  
- - `not_in()` — perform the inverse of the `is_in()` method
- - `not_like()` — perform the inverse of the `str.contains()` method
+1. `affiche()` — display a Polars DataFrame or LazyFrame with aethetic table borders and styling (from the French *affiche* to display something)
+     - As a bonus, this is also provided as a function (import required) 
+2. `count_table()` — create a frequency table with counts and percentages
+3. `count_null()` — create a summary table counting `null` values for each column in a DataFrame or LazyFrame
+4. `pasteurize()` — clean a DataFrame or LazyFrame by removing empty rows, duplicates, and standardizing column names
+5. `not_in()` — perform the inverse of the `is_in()` method
+6. `not_like()` — perform the inverse of the `str.contains()` method
 
 ### 3. Verb functions
 
 As hinted at above, penguins gains most of its utility from its dplyr-styled functions. While they'll be covered in the [Examples](#examples) section, here are the verb functions that have currently been ported over:
-1. `select()` — select specific columns from the DataFrame
+1. `select()` — select specific columns from the table
 2. `filter()` — filter rows based on boolean conditions
 3. `mutate()` — create new columns or modify existing ones
-4. `group_by()` —  group DataFrame by one or more columns
+4. `group_by()` — group table by one or more columns
 5. `summarize()` — aggregate data, typically after `group_by()`
 6. `reframe()` — create new rows based on group summaries, also typically used after `group_by()`
 7. `pull()` — extract a single column as a series or scalar value
-8. `join()` — join two dataframes on a matching column
+8. `join()` — join two tables on a matching column
     - How: "inner", "left", "right", "outer", "cross", "semi", "anti"
-9. `pivot_wider()` — pivot a dataframe from long to wide format
-10. `pivot_longer()` — pivot a dataframe from wide to long format
+9. `pivot_wider()` — pivot a table from long to wide format
+10. `pivot_longer()` — pivot a table from wide to long format
 11. `unite()` — combine multiple columns into one column
 12. `separate()` — split a column into multiple columns
-13. `bind_cols()` — bind the columns of two dataframes together
-15. `bind_rows()` — bind the rows of two dataframes together
+13. `bind_cols()` — bind the columns of two tables together
+15. `bind_rows()` — bind the rows of two tables together
 16. `head()` — return first n rows
 17. `tail()` — return last n rows
 18. `slice()` — select rows by position
-19. `sample()` — return a sample of rows from a dataframe
+19. `sample()` — return a sample of rows from a table
 20. `distinct()` — keep only unique rows based on specified columns
 21. `arrange()` — sort rows by column expressions
-22. `relocate()` — reorder columns in a DataFrame
+22. `relocate()` — reorder columns in a table
 23. `rename()` — rename columns
 24. `round()` — round numeric columns to specified decimal places
 25. `drop_null()` — remove rows with `null` values
@@ -250,10 +247,9 @@ df.pasteurize()["sex"].count_table().affiche()
 <details>
 <summary>View examples</summary>
 
+By design, `not_in()` is for use in a `filter()` statement:
+
 ```python
-# We'll preview the filter() function here,
-# which will be covered in the Functions examples
-# And use affiche() as a function instead of a method
 df >> filter(_.rowid.not_in(range(1, 339))) \
     >> affiche()
 ```
@@ -280,7 +276,6 @@ df >> filter(_.rowid.not_in(range(1, 339))) \
 <summary>View examples</summary>
 
 ```python
-# And here, we'll preview the head() function to be covered below
 df >> filter(_.island.not_like("^B|D")) \
     >> head() \
     >> affiche()
@@ -348,7 +343,8 @@ df >> select(~_.species, ~_.island, ~_.body_mass_g, ~_.sex) \
 ╚═══════╩════════════════╩═══════════════╩═══════════════════╩═══════╝
 ```
 
-As well as the column range operator `|` for specifying a range of columns
+As well as the column range operator `|` for specifying a range of columns:
+
 ```python
 df >> select(_.bill_length_mm | _.body_mass_g) \
     >> head() \
@@ -367,7 +363,7 @@ df >> select(_.bill_length_mm | _.body_mass_g) \
 ╚════════════════╩═══════════════╩═══════════════════╩═════════════╝
 ```
 
-We can also use the unpacking operator `*` here:
+We can also use the unpacking operator `*` in `select()`:
 
 ```python
 cols = ["species", "sex", "year"]
@@ -458,7 +454,8 @@ df >> filter(_.sex == "male", _.year == 2008) \
 ╚═══════╩══════╩═══════╝
 ```
 
-There's also a helper function `row_contains()` for filtering for any rows that match any given value[s]
+There's also a helper function `row_contains()` for filtering for any rows that match any given value[s]:
+
 ```python
 df >> filter(row_contains("NA", "None")) \
     >> head() \
@@ -568,7 +565,7 @@ df >> mutate(across(ends_with("mm"), lambda x: x.cast(pl.Float64, strict = False
 ╚════════════════╩═══════════════╩═══════════════════╝
 ```
 
-We also have access to the following helper functions within `where()`: `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean`, `is_temporal`, `is_null` and `is_cat` 
+We also have access to the following helper functions within `where()`: `is_numeric`, `is_integer`, `is_float`, `is_string`, `is_boolean`, `is_temporal`, `is_null` and `is_cat`:
 
 ```python
 # Covert strings to uppercase
@@ -592,7 +589,7 @@ df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase())) \
 ╚═════════╩════════╩════════╝
 ```
 
-`mutate()` also allows for arithmetic operators (e.g. `+`, `*`, `/`) to be used across columns 
+`mutate()` also allows for arithmetic operators (e.g. `+`, `*`, `/`) to be used across columns:
 
 ```python
 df >> mutate(across(starts_with("bill"), lambda x: x.cast(pl.Float64, strict = False))) \
@@ -726,7 +723,7 @@ df >> mutate(across(ends_with("mm|g"), lambda x: x.cast(pl.Float64, strict = Fal
 <details>
 <summary>View examples</summary>
 
-Similar to `R`, we can use `pull()` to retrieve a single value:
+Similar to `R`, we can use `pull()` to retrieve a single value or a list:
 
 ```python
 # Pull the number of adelie penguins
@@ -743,7 +740,7 @@ The number of adelie penguins is: 152
 
 </details> 
 
-#### 7. `join()`
+#### 7. `join()` 
 
 <details>
 <summary>View examples</summary>
@@ -1011,7 +1008,7 @@ df >> bind_rows(df2) \
 <details>
 <summary>View examples</summary>
 
-The default is 5 rows but can be specified:
+The default is 5 rows, but can be specified:
 
 ```python
 df >> head() \
@@ -1141,7 +1138,6 @@ df >> sample(10) \
 
 <details>
 <summary>View examples</summary>
-
 
 The default behavior of `distinct()` is application to all columns, but can be specified: 
 
@@ -1279,7 +1275,7 @@ df >> rename(row_id = _.rowid,
 <details>
 <summary>View examples</summary>
 
-By default, `round()` will round all numeric columns to two decimals:
+By default, `round()` will round all numeric columns to two decimals — where both can be specified::
 
 ```python
 int_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
@@ -1390,3 +1386,5 @@ Penguins really just relies on polars for doing all of its data manipulation.
 
 ## Notes
 Palmer penguin data from [palmerpenguins](https://github.com/allisonhorst/palmerpenguins) R package
+
+**Disclaimer**: This project was created with assistance from generative AI tools.

@@ -2,6 +2,11 @@
 
 All notable changes to `penguins` will be documented in this changelog
 
+## *0.3.6* — 2025-11-18
+
+### Improvements
+- Added comptability for method chaining within verb calls through chained symbolic attribution 
+
 ## *0.3.5* — 2025-11-11
 
 ### Fixes

@@ -1,6 +1,27 @@
 # Establish symbolic attribution for polars dataframes
 import polars as pl
-from penguins.core.pipe import MethodCall
+
+class MethodCall:
+    """
+    Represents a method call to be executed on a DataFrame.
+    
+    Used when piping to DataFrame methods via _.method_name()
+    """
+    def __init__(self, method_name, args, kwargs):
+        self.method_name = method_name
+        self.args = args
+        self.kwargs = kwargs
+    
+    def __call__(self, df):
+        """
+        Execute the method call on the DataFrame.
+        
+        df: The DataFrame to call the method on
+        
+        Returns the result of the method call
+        """
+        method = getattr(df, self.method_name)
+        return method(*self.args, **self.kwargs)
 
 class SymbolicAttr:
     """
@@ -23,9 +44,14 @@ class SymbolicAttr:
     def __getattr__(self, attr):
         """
         Forward attribute access to the Polars expression.
-        
+    
         Allows chaining like _.column_name.fill_null()
         """
+        # Check if this is an aggregation method we need to track for pandas
+        if attr in ['count', 'sum', 'mean', 'min', 'max', 'std', 'var', 'first', 'last', 'median']:
+            # Return a ChainedSymbolicAttr that tracks the aggregation
+            return ChainedSymbolicAttr(self.name, attr)
+    
         return getattr(self._expr, attr)
     
     def __repr__(self):
@@ -147,6 +173,15 @@ class SymbolicAttr:
         if isinstance(other, SymbolicAttr):
             other = other._expr
         return self._expr.__pow__(other)
+    
+class ChainedSymbolicAttr(SymbolicAttr):
+    """
+    Tracks chained method calls on symbolic attributes for pandas compatibility.
+    """
+    def __init__(self, name, agg_func):
+        self.name = name
+        self._agg_func = agg_func
+        self._expr = pl.col(name)
     
 # Establish symbolic class for polars dataframes
 class Symbolic:
