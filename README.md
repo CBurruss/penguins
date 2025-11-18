@@ -22,7 +22,7 @@ If we look at the penguins package, we can group its utilities into four main ca
 
 At its core, penguins provides a dplyr-flavored interface for polars through two main features:
 
- - The pipe operator `>>` — enables function function chaining akin to R's `|>` pipe
+ - The pipe operator `>>` — enables function chaining akin to R's `|>` pipe
  - The symbolic placeholder `_` — acts as a helper by standing in for two main use cases:
       1. DataFrame references in method calls — e.g. `df >> _.head(5)`
       2. Column references in verb expressions — e.g. `df >> select(_.col)`
