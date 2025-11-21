@@ -56,17 +56,17 @@ As hinted at above, penguins gains most of its utility from its dplyr-styled fun
 11. `unite()` — combine multiple columns into one column
 12. `separate()` — split a column into multiple columns
 13. `bind_cols()` — bind the columns of two tables together
-15. `bind_rows()` — bind the rows of two tables together
-16. `head()` — return first n rows
-17. `tail()` — return last n rows
-18. `slice()` — select rows by position
-19. `sample()` — return a sample of rows from a table
-20. `distinct()` — keep only unique rows based on specified columns
-21. `arrange()` — sort rows by column expressions
-22. `relocate()` — reorder columns in a table
-23. `rename()` — rename columns
-24. `round()` — round numeric columns to specified decimal places
-25. `drop_null()` — remove rows with `null` values
+14. `bind_rows()` — bind the rows of two tables together
+15. `head()` — return first n rows
+16. `tail()` — return last n rows
+17. `slice()` — select rows by position
+18. `sample()` — return a sample of rows from a table
+19. `distinct()` — keep only unique rows based on specified columns
+20. `arrange()` — sort rows by column expressions
+21. `relocate()` — reorder columns in a table
+22. `rename()` — rename columns
+23. `round()` — round numeric columns to specified decimal places
+24. `drop_null()` — remove rows with `null` values
 
 ### 4. Helper functions
 
@@ -526,7 +526,9 @@ df >> mutate(genus = None, _after = "species") \
 Importantly, `mutate()` allows for applying transformations across multiple columns with `across()`:
 
 ```python
-df >> mutate(across([_.species, _.island], lambda x: x.str.to_lowercase())) \
+to_lower = lambda x: x.str.to_lowercase()
+
+df >> mutate(across([_.species, _.island], to_lower)) \
     >> select(_.species, _.island) \
     >> head() \
     >> affiche()
@@ -547,7 +549,9 @@ df >> mutate(across([_.species, _.island], lambda x: x.str.to_lowercase())) \
 We can even use the selector helpers — `starts_with()`, `ends_with()` and `contains()` — within our `across()` call:
 
 ```python
-df >> mutate(across(ends_with("mm"), lambda x: x.cast(pl.Float64, strict = False))) \
+to_float = lambda x: x.cast(pl.Float64, strict = False)
+
+df >> mutate(across(ends_with("mm"), to_float)) \
     >> select(ends_with("mm")) \
     >> head() \
     >> affiche()
@@ -569,7 +573,9 @@ We also have access to the following helper functions within `where()`: `is_nume
 
 ```python
 # Covert strings to uppercase
-df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase())) \
+to_upper = lambda x: x.str.to_uppercase()
+
+df >> mutate(across(where(is_string), to_upper)) \
     >> select(where(is_string)) \
     >> select(~(_.bill_length_mm | _.body_mass_g)) \
     >> distinct() \
@@ -592,7 +598,9 @@ df >> mutate(across(where(is_string), lambda x: x.str.to_uppercase())) \
 `mutate()` also allows for arithmetic operators (e.g. `+`, `*`, `/`) to be used across columns:
 
 ```python
-df >> mutate(across(starts_with("bill"), lambda x: x.cast(pl.Float64, strict = False))) \
+to_float = lambda x: x.cast(pl.Float64, strict = False)
+
+df >> mutate(across(starts_with("bill"), to_float)) \
     >> mutate(bill_area = _.bill_length_mm * _.bill_depth_mm, _after = "bill_depth_mm") \
     >> select(starts_with("bill")) \
     >> round() \
@@ -699,7 +707,9 @@ df >> group_by(_.species) \
 Unlike `summarize()`, `reframe()` in a `group_by()` creates new rows based on group summaries:
 
 ```python
-df >> mutate(across(ends_with("mm|g"), lambda x: x.cast(pl.Float64, strict = False))) \
+to_float = lambda x: x.cast(pl.Float64, strict = False)
+
+df >> mutate(across(ends_with("mm|g"), to_float)) \
     >> group_by(_.species) \
     >> reframe(mean_bill = _.bill_length_mm.mean().round(2), 
                mean_weight = _.body_mass_g.mean().round(2)) \
@@ -1278,9 +1288,11 @@ df >> rename(row_id = _.rowid,
 By default, `round()` will round all numeric columns to two decimals — where both can be specified::
 
 ```python
-int_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
+num_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
 
-df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
+to_float = lambda x: x.cast(pl.Float64, strict = False)
+
+df >> mutate(across(num_cols, to_float)) \
     >> _.describe() \
     >> select(_.statistic, *int_cols) \
     >> round() \
@@ -1306,14 +1318,16 @@ df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
 But we can also specify columns, and to how many decimals:
 
 ```python
-int_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
+num_cols = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
+
+to_float = lambda x: x.cast(pl.Float64, strict = False)
 
 # Here, we use the unpacking operator * to unpack the list, filtered with a range
-df >> mutate(across(int_cols, lambda x: x.cast(pl.Float64, strict = False))) \
+df >> mutate(across(num_cols, to_float)) \
     >> _.describe() \
-    >> select(_.statistic, *int_cols) \
+    >> select(_.statistic, *num_cols) \
     >> round(_.body_mass_g, decimals = 5) \
-    >> round(*int_cols[0:3], decimals = 0) \
+    >> round(*num_cols[0:3], decimals = 0) \
     >> affiche()
 ```
 ```
